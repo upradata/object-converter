@@ -1,0 +1,21 @@
+{
+  "name": "json-object-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Milotti",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^9.4.7",
+    "emoji-datasource": "^4.0.3",
+    "typescript": "^2.7.2"
+  },
+  "dependencies": {
+    "colors": "^1.2.1",
+    "common-tags": "^1.7.2",
+    "reflect-metadata": "^0.1.12"
+  }
+}

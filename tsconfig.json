@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "declaration": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "es2017"
+        ],
+        "module": "umd",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "target": "es6",
+        "traceResolution": false,
+        "outDir": "out"
+    },
+    "include": [
+        "src/**/*.ts",
+        "global-ts-definition/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "src/**/*.spec.ts",
+        "src/**/__tests__/*.ts"
+    ],
+    "compileOnSave": false,
+    "atom": {
+        "rewriteTsconfig": false
+    }
+}
