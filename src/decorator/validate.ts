@@ -17,15 +17,18 @@ export class Validate {
 
 
 
-    public static validateClass(constructor: ClassType) {
+    public static validateClass(constructor: ClassType, onlyDefinedProperties: boolean = false) {
         // save a reference to the original constructor
         const originalConstructor = constructor;
 
         // the new constructor behaviour
         const newConstructor: any = function (...args) {
             const newObj = new originalConstructor(...args);
-            RequiredParameter.check(originalConstructor.prototype, 'constructor', originalConstructor, arguments);
-            RequiredProperty.check(constructor.prototype, newObj);
+
+            if (!onlyDefinedProperties)
+                RequiredParameter.check(originalConstructor.prototype, 'constructor', originalConstructor, arguments);
+            else
+                RequiredProperty.check(constructor.prototype, newObj);
 
             return newObj;
 

@@ -3,6 +3,7 @@ import { Function2, LiteralType, LiteralInString } from './definition';
 import { Parse } from './parse';
 import { Returnable, ArrayReturnable } from './returnable';
 import { ElementOption, XorElementOption, LiteralElementOption, LiteralElementOptionAny } from './array-element';
+import { RequiredIf } from './decorator/required';
 
 
 // type ElementOption<ListElmt> = ListOption<ListElmt> | ObjectOption<ListElmt, any> | LiteralElementOption<Literal>;
@@ -12,13 +13,10 @@ export class ListOption<ListElmt = any, ReturnVisitor = ListElmt> {
     filter?: Function2<ListElmt, number, boolean>;
     mutate?: Function2<ListElmt, number, ReturnVisitor>;
     option?: Function2<ListElmt, number, XorElementOption<ListElmt>>;
-    element?: ElementOption<ListElmt>;
-    all?: boolean;
+    @RequiredIf(function () { return this.all !== undefined; }) element?: ElementOption<ListElmt>;
+    @RequiredIf(function () { return this.element !== undefined; }) all?: boolean;
 
     constructor(option: ListOption<ListElmt, ReturnVisitor>) {
-        if (option.all === undefined && option.element === undefined)
-            throw new Error('ListOption needs either "all" or "element to be set."');
-
         this.returnObject = option.returnObject || new ArrayReturnable();
         this.mutate = option.mutate || ((value: any, index: number) => value);
         this.filter = option.filter || ((value: any, index: number) => true);

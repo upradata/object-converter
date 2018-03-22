@@ -1,18 +1,19 @@
-import { Required, RequiredIf, Validate } from '../required';
+import { Required, RequiredIf, Validate, ValidateProperties } from '../required';
 
 
-@Validate
+@ValidateProperties
 class Greeter {
     greeting: string;
     @RequiredIf(function () { return this.p2 === undefined; }) p1: string;
     @RequiredIf(function () { return this.p1 === undefined; }) p2: boolean;
     @RequiredIf(function () { return this.p1 === 'caca' && this.p2 === true; }) p3: number;
 
-    constructor(dummy: number, @Required message?: string) {
+    constructor(dummy: number, @Required message?: string, p2?: boolean) {
         this.greeting = message;
-        this.p2 = true;
+        this.p2 = p2;
+        /* this.p2 = true;
         this.p1 = 'caca';
-        this.p3 = 2;
+        this.p3 = 2; */
     }
 
     @Validate
@@ -21,7 +22,15 @@ class Greeter {
     }
 }
 
-const g = new Greeter(1, 'caca');
+let g: Greeter;
+try {
+    g = new Greeter(1, 'caca');
+} catch (e) {
+    console.log(e.message);
+}
+
+
+g = new Greeter(1, 'caca', true);
 console.log(g.greet(1, 'thomas'));
 
 try {

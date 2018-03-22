@@ -1,7 +1,7 @@
 import { RequiredProperty } from './required-property';
 import { RequiredParameter } from './required-parameter';
 import { Validate as ValidateDecorator } from './validate';
-import { Condition, FunctionType } from './definition';
+import { Condition, FunctionType, ClassType } from './definition';
 
 /*
  *
@@ -33,6 +33,10 @@ export function RequiredIf(condition: Condition) {
  *
  * Validate decorator
  */
+
+export function ValidateProperties(target: any) {
+    return ValidateDecorator.validateClass(target, true);
+}
 
 export function Validate(target: any, propertyName?: string, descriptor?: TypedPropertyDescriptor<FunctionType>) {
 
