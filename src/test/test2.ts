@@ -8,15 +8,16 @@ import { LiteralOptionProperties, LiteralOption } from '../parser/litral/literal
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { KeyType } from '../parser/definition';
+import { KeyType, VisitorRecursive } from '../parser/definition';
 
 
 const test = {
     all_Null_Remover: true,
+    all_Null_Remover_Recursive: true,
     few_Few_WithVisitor: false,
     few_Few: false,
     few_All: false,
-    all: false
+    all: false,
 };
 
 
@@ -155,6 +156,40 @@ const extractionFew_Few_WithVisitor = {
 } as ArrayOptionProperties;
 
 
+const extractionFew_Few_WithVisitor2_A_FAIRE = {
+
+    object: {
+
+        properties: {
+
+            name: {
+                mutate: (key: string, name: string) => 'Ta mere LA PUTE : ' + name
+            } as LiteralOption,
+            unified: true,
+            sheet_x: true,
+            skin_variations: {
+                all: true,
+
+                properties: {
+                    string: {
+                        unified: true,
+                        image: {
+                            mutate: (key: string, image: string) => 'L IMAGE qui tue : ' + image
+                        } as LiteralOption,
+                        sheet_x: true
+                    } as MembersOptionProperties
+
+                } as MembersOptionProperties
+
+            } as ObjectOptionProperties
+
+        } as MembersOptionProperties
+
+    } as ObjectOptionProperties
+
+} as ArrayOptionProperties;
+
+
 if (test.few_Few_WithVisitor)
     $writeJson(path.join(jsonDir, 'emoji-few-few-with-visitor.json'), Element.create(emojisJson, extractionFew_Few_WithVisitor).parse()).then(
         fileName => console.log(`${fileName} :)`),
@@ -199,6 +234,27 @@ const extractionAll_Null_Remover = {
 
 if (test.all_Null_Remover)
     $writeJson(path.join(jsonDir, 'emojis_all_null_remover.json'), Element.create(emojisJson, extractionAll_Null_Remover).parse()).then(
+        fileName => console.log(`${fileName} :)`),
+        err => console.error(err)
+    );
+
+
+
+
+
+const extractionAll_Null_Remover_Recursive = {
+    all: true,
+    filter: {
+        visitor: (key: string, value: any) => value !== null,
+        recursive: true
+    } as VisitorRecursive
+
+} as ArrayOptionProperties;
+
+
+
+if (test.all_Null_Remover_Recursive)
+    $writeJson(path.join(jsonDir, 'emojis_all_null_remover_recursive.json'), Element.create(emojisJson, extractionAll_Null_Remover_Recursive).parse()).then(
         fileName => console.log(`${fileName} :)`),
         err => console.error(err)
     );

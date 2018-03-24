@@ -1,5 +1,5 @@
 // import { ObjectOption, OBject } from './object';
-import { Function2, LiteralType, LiteralInString, Visitor } from './definition';
+import { Function2, LiteralType, LiteralInString, Visitor, VisitorRecursive } from './definition';
 import { Returnable, ArrayReturnable } from './returnable';
 // import { ElementOption, XorElementOption, LiteralElementOption, LiteralElementOptionAny } from './array-element';
 import { RequiredIf, ValidateProperties } from '../decorator/required';
@@ -9,9 +9,9 @@ import { isBoolean } from 'util';
 
 export interface OptionProperties {
     returnObject?: Returnable;
-    filter?: Visitor;
-    mutate?: Visitor;
-    option?: Visitor;
+    filter?: Visitor | VisitorRecursive;
+    mutate?: Visitor | VisitorRecursive;
+    option?: Visitor | VisitorRecursive;
     elementOption?: any; // Option[];
     all?: boolean;
 }
@@ -20,25 +20,30 @@ export interface OptionProperties {
 @RequiredIf(function () { return this.elementOption === undefined; }) all ?: boolean; */
 
 export class Option {
-    protected _option: OptionProperties = {} as OptionProperties;
+    protected _returnObject: Returnable;
+    protected _filter: VisitorRecursive;
+    protected _mutate: VisitorRecursive;
+    protected _option: VisitorRecursive;
+    protected _elementOption?: any; // Option[];
+    protected _all: boolean;
 
     constructor(option: OptionProperties) {
-        this._option.returnObject = option.returnObject;
-        this._option.mutate = option.mutate || ((index: number, value: any) => value);
-        this._option.filter = option.filter || ((index: number, value: any) => true);
-        this._option.option = option.option;
-        this._option.elementOption = option.elementOption;
+        this._returnObject = option.returnObject;
+        this._mutate = new VisitorRecursive(option.mutate || ((index: number, value: any) => value));
+        this._filter = new VisitorRecursive(option.filter || ((index: number, value: any) => true));
+        this._option = new VisitorRecursive(option.option);
+        this._elementOption = option.elementOption;
 
 
-        if (isBoolean(this.elementOption))
-            this._option.all = this.elementOption;
+        if (isBoolean(this._elementOption))
+            this._all = this._elementOption;
 
 
-        this._option.all = option.all;
+        this._all = option.all;
 
-        if (option.all === undefined && this.elementOption === undefined) {
+        if (option.all === undefined && this._elementOption === undefined) {
             // console.warn(`element doesn't have any option. Default mode -> option.all = true (recursively)`);
-            this._option.all = true;
+            this._all = true;
         }
 
     }
@@ -46,20 +51,35 @@ export class Option {
 
     public getOption(key: number | string, json: any): OptionProperties {
 
-        if (this._option.option !== undefined)
-            return this._option.option(key, json);
+        if (this._option.visitor !== undefined)
+            return this._option.visitor(key, json);
 
         const option = this.getSpecializedOption(key, json);
         if (option !== undefined)
-            return option;
+            return this.plugRecursive(option);
 
-        if (this._option.elementOption !== undefined)
-            return this._option.elementOption;
+        if (this._elementOption !== undefined)
+            return this._elementOption;
 
-        if (this._option.all)
-            return new Option({ all: true });
+        if (this._all)
+            return this.plugRecursive({ all: true });
 
         throw new Error('Impossible');
+    }
+
+
+    private plugRecursive(option: OptionProperties): OptionProperties {
+        for (const prop of ['mutate', 'option', 'filter']) {
+
+            if (this['_' + prop].recursive && option[prop] === undefined) {
+                option[prop] = {
+                    visitor: this['_' + prop].visitor,
+                    recursive: true
+                };
+            }
+        }
+
+        return option;
     }
 
 
@@ -68,13 +88,13 @@ export class Option {
     }
 
 
+
     // getters
 
-    get returnObject() { return this._option.returnObject; }
-    get filter() { return this._option.filter; }
-    get mutate() { return this._option.mutate; }
-    get elementOption() { return this._option.elementOption; }
-    get all() { return this._option.all; }
-
-    // get getOption() { return this.option.getOption; }
+    get filter() { return this._filter.visitor; }
+    get mutate() { return this._mutate.visitor; }
+    get option() { return this._option.visitor; }
+    get returnObject() { return this._returnObject; }
+    get elementOption() { return this._elementOption; }
+    get all() { return this._all; }
 }

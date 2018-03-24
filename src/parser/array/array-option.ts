@@ -18,13 +18,13 @@ export class ArrayOption extends Option {
             super(option);
 
 
-        if (this._option.returnObject === undefined)
-            this._option.returnObject = new ArrayReturnable();
+        if (this._returnObject === undefined)
+            this._returnObject = new ArrayReturnable();
     }
 
 
     protected getSpecializedOption(key: number | string, json: any): ArrayOptionProperties {
-        if (this.elementOption === undefined)
+        if (this._elementOption === undefined)
             return undefined;
 
         let typeOf: string = typeof json;
@@ -32,6 +32,6 @@ export class ArrayOption extends Option {
             typeOf = 'null';
 
 
-        return this.elementOption[typeOf] || this.elementOption;
+        return this._elementOption[typeOf] || this._elementOption;
     }
 }

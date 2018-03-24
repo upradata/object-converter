@@ -2,8 +2,8 @@
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
         "declaration": false,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
+        "emitDecoratorMetadata": false,
+        "experimentalDecorators": false,
         "lib": [
             "es2017"
         ],
@@ -21,6 +21,7 @@
     ],
     "exclude": [
         "node_modules",
+        "src/decorator/**/*.ts",
         "src/**/*.spec.ts",
         "src/**/__tests__/*.ts"
     ],

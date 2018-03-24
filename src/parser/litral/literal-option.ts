@@ -16,14 +16,14 @@ export class LiteralOption extends Option {
         else
             super(option);
 
-        if (this._option.returnObject === undefined)
-            this._option.returnObject = new LiteralReturnable();
+        if (this._returnObject === undefined)
+            this._returnObject = new LiteralReturnable();
     }
 
 
 
     protected getSpecializedOption(key: number | string, json: any): LiteralOptionProperties {
-        return this.elementOption;
+        return this._elementOption;
     }
 
 }
