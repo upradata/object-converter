@@ -10,15 +10,15 @@ import { Validate } from './decorator/validate';
 // type ElementOption<ListElmt> = ListOption<ListElmt> | ObjectOption<ListElmt, any> | LiteralElementOption<Literal>;
 
 @ValidateProperties
-export class ListOption<ListElmt = any, ReturnVisitor = ListElmt> {
+export class CollectionOption<ListElmt = any, ReturnMutate = ListElmt> {
     returnObject?: Returnable;
     filter?: Function2<ListElmt, number, boolean>;
-    mutate?: Function2<ListElmt, number, ReturnVisitor>;
+    mutate?: Function2<ListElmt, number, ReturnMutate>;
     option?: Function2<ListElmt, number, XorElementOption<ListElmt>>;
     @RequiredIf(function () { return this.all === undefined; }) element?: ElementOption<ListElmt>;
     @RequiredIf(function () { return this.element === undefined; }) all?: boolean;
 
-    constructor(option: ListOption<ListElmt, ReturnVisitor>) {
+    constructor(option: CollectionOption<ListElmt, ReturnMutate>) {
         this.returnObject = option.returnObject || new ArrayReturnable();
         this.mutate = option.mutate || ((value: any, index: number) => value);
         this.filter = option.filter || ((value: any, index: number) => true);
@@ -29,9 +29,9 @@ export class ListOption<ListElmt = any, ReturnVisitor = ListElmt> {
 }
 
 
-export class List {
+export class Collection {
 
-    constructor(private option: ListOption) { }
+    constructor(private option: CollectionOption) { }
 
 
     public parse(list: Array<any>) {

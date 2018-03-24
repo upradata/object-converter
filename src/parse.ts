@@ -9,11 +9,11 @@ export class Parse {
     constructor(private json: {}, private option: ListOption | ObjectOption) { }
 
     public parse() {
-        return Parse.parseNext(this.option, this.json);
+        return Parse.parseNext(this.json, this.option);
     }
 
 
-    public static parseNext(option: ListOption | ObjectOption, value: any) {
+    public static parseNext(value: any, option: ListOption | ObjectOption) {
         if (isArray(value))
             return new List(option as ListOption).parse(value);
 

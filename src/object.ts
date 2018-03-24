@@ -4,14 +4,15 @@ import { PlainObject, Function2 } from './definition';
 import { Parse } from './parse';
 import { Returnable, ObjectReturnable } from './returnable';
 import { triggerAsyncId } from 'async_hooks';
+import { RequiredIf } from './decorator/required';
 
 export class ObjectOption<ListElmt = any, ReturnVisitor = any> {
     returnObject?: Returnable;
     filter?: Function2<string, ListElmt, boolean>;
     mutate?: Function2<string, ListElmt, ReturnVisitor>;
     option?: Function2<ListElmt, number, PropertyOption<ListElmt, ReturnVisitor>>;
-    properties: Array<PropertyOption<ListElmt, ReturnVisitor>>;
-    all?: boolean;
+    @RequiredIf(function () { return this.all !== undefined; }) properties: Array<PropertyOption<ListElmt, ReturnVisitor>>;
+    @RequiredIf(function () { return this.properties !== undefined; }) all?: boolean;
 
 
     constructor(option: ObjectOption) {

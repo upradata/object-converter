@@ -19,6 +19,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Test2",
+            "program": "${workspaceFolder}/out/test/test2.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}/index.js",
             "preLaunchTask": "tsc: build - tsconfig.json",

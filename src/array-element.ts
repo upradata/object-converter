@@ -37,6 +37,9 @@ export class ElementOption<Element = any> {
 
 
     constructor(option: ElementOption<Element>) {
+        if (Object.entries(option).length === 0)
+            throw new Error('ElementOption construtor needs at least 1 entry.');
+
         Object.assign(this, option);
     }
 

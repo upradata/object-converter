@@ -11,6 +11,7 @@
   "devDependencies": {
     "@types/node": "^9.4.7",
     "emoji-datasource": "^4.0.3",
+    "fs-extra": "^5.0.0",
     "typescript": "^2.7.2"
   },
   "dependencies": {

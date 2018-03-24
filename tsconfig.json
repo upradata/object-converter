@@ -15,7 +15,8 @@
         "outDir": "out"
     },
     "include": [
-        "src/**/*.ts",
+        "src/parser/**/*.ts",
+        "src/test/**/*.ts",
         "global-ts-definition/**/*.ts"
     ],
     "exclude": [
