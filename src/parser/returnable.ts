@@ -1,10 +1,16 @@
-import { LiteralType, KeyType } from './definition';
+import { LiteralType, KeyType, FunctionPartial } from './definition';
 
 
 export interface Returnable {
-    push(key: KeyType, arg: any): void;
+    push: FunctionPartial<void>;
     value(): Array<any> | {};
 }
+
+
+export interface ReturnableConstructable {
+    new(...args: any[]): Returnable;
+}
+
 
 export class ArrayReturnable implements Returnable {
     private container = [];

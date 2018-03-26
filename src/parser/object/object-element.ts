@@ -3,8 +3,8 @@ import { ObjectOption } from './object-option';
 
 export class ObjectElement extends Element {
 
-    constructor(json: {}, option: ObjectOption) {
-        super(json, option);
+    constructor(json: {}, option: ObjectOption, level: number) {
+        super(json, option, level);
     }
 
 
@@ -17,18 +17,25 @@ export class ObjectElement extends Element {
 
 
     private *iteratortAll(): IterableIterator<IteratorElement> {
-        for (const [key, elmt] of Object.entries(this.json))
-            yield [key, elmt, false];
+        const entries = Object.entries(this.json);
+        let index = 0;
+
+        for (const [key, elmt] of entries)
+            yield [key, elmt, ++index === entries.length];
 
     }
 
 
     private *iteratorPartial(): IterableIterator<IteratorElement> {
-        for (const key of Object.keys(this.option.elementOption)) {
+        const keys = Object.keys(this.option.elementOption).filter(key => this.json[key] !== undefined);
+        let index = 0;
 
-            if (this.json[key] !== undefined) // security
-                yield [key, this.json[key], false];
-
+        for (const key of keys) {
+            if (this.json[key] !== undefined) {
+                yield [key, this.json[key], ++index === keys.length];
+            }
         }
     }
+
+
 }

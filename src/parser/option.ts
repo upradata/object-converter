@@ -1,23 +1,23 @@
-// import { ObjectOption, OBject } from './object';
-import { Function2, LiteralType, LiteralInString, Visitor, VisitorRecursive } from './definition';
-import { Returnable, ArrayReturnable } from './returnable';
-// import { ElementOption, XorElementOption, LiteralElementOption, LiteralElementOptionAny } from './array-element';
-import { RequiredIf, ValidateProperties } from '../decorator/required';
-import { Validate } from '../decorator/validate';
+import { Visitor, VisitorRecursive } from './definition';
+import { Returnable, ReturnableConstructable } from './returnable';
 import { isBoolean } from 'util';
 
 
 export interface OptionProperties {
-    returnObject?: Returnable;
+    returnObject?: ReturnableConstructable;
     filter?: Visitor | VisitorRecursive;
     mutate?: Visitor | VisitorRecursive;
     option?: Visitor | VisitorRecursive;
     elementOption?: any; // Option[];
+    // synonyms of elementOption
+    object?: any;
+    array?: any;
+    properties?: any;
+    // all elements in json
     all?: boolean;
 }
 
-/* @RequiredIf(function () { return this.all === undefined; }) elementOption ?: Option;
-@RequiredIf(function () { return this.elementOption === undefined; }) all ?: boolean; */
+
 
 export class Option {
     protected _returnObject: Returnable;
@@ -28,11 +28,11 @@ export class Option {
     protected _all: boolean;
 
     constructor(option: OptionProperties) {
-        this._returnObject = option.returnObject;
+        this._returnObject = option.returnObject === undefined ? undefined : new option.returnObject();
         this._mutate = new VisitorRecursive(option.mutate || ((index: number, value: any) => value));
         this._filter = new VisitorRecursive(option.filter || ((index: number, value: any) => true));
         this._option = new VisitorRecursive(option.option);
-        this._elementOption = option.elementOption;
+        this._elementOption = option.elementOption || option.object || option.array || option.properties;
 
 
         if (isBoolean(this._elementOption))
@@ -49,10 +49,10 @@ export class Option {
     }
 
 
-    public getOption(key: number | string, json: any): OptionProperties {
+    public getOption(key: number | string, json: any, level: number, done): OptionProperties {
 
         if (this._option.visitor !== undefined)
-            return this._option.visitor(key, json);
+            return this._option.visitor(key, json, level, done);
 
         const option = this.getSpecializedOption(key, json);
         if (option !== undefined)

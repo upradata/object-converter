@@ -6,6 +6,8 @@ export type MembersOptionProperties = { [key: string]: OptionProperties | boolea
 
 export interface ObjectOptionProperties extends OptionProperties {
     elementOption?: MembersOptionProperties | boolean;
+    properties?: MembersOptionProperties | boolean;
+
 }
 
 
@@ -15,6 +17,7 @@ export class ObjectOption extends Option {
             super({ all: true });
         else
             super(option);
+
 
         if (this._returnObject === undefined)
             this._returnObject = new ObjectReturnable();

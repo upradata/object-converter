@@ -7,6 +7,8 @@ import { isBoolean } from 'util';
 
 export interface ArrayOptionProperties extends OptionProperties {
     elementOption?: {[K in keyof Literal]?: OptionProperties} & { object?: OptionProperties } | OptionProperties | boolean;
+    object?: ArrayOptionProperties['elementOption'];
+    array?: ArrayOptionProperties['elementOption'];
 }
 
 

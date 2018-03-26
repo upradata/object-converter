@@ -1,11 +1,10 @@
 import { Option, OptionProperties } from '../option';
 import { LiteralReturnable } from '../returnable';
 import { isBoolean } from 'util';
-import { zalgo } from 'colors/safe';
-
+import { Literal } from '../definition';
 
 export interface LiteralOptionProperties extends OptionProperties {
-    elementOption?: { [key: string]: OptionProperties } | boolean;
+    elementOption?: {[K in keyof Literal]?: OptionProperties } | OptionProperties | boolean;
 }
 
 
@@ -23,7 +22,16 @@ export class LiteralOption extends Option {
 
 
     protected getSpecializedOption(key: number | string, json: any): LiteralOptionProperties {
-        return this._elementOption;
+        if (this._elementOption === undefined)
+            return undefined;
+
+        let typeOf: string = typeof json;
+        if (typeOf === 'object' && json === null)
+            typeOf = 'null';
+        else
+            throw new Error('A LiteralElement cannot be an object');
+
+        return this._elementOption[typeOf] || this.elementOption;
     }
 
 }
