@@ -1,6 +1,5 @@
 import { Option, OptionProperties } from '../option';
 import { ObjectReturnable } from '../returnable';
-import { isBoolean } from 'util';
 
 export type MembersOptionProperties = { [key: string]: OptionProperties | boolean };
 
@@ -13,7 +12,7 @@ export interface ObjectOptionProperties extends OptionProperties {
 
 export class ObjectOption extends Option {
     constructor(option: ObjectOptionProperties | boolean) {
-        if (isBoolean(option))
+        if (typeof option === 'boolean')
             super({ all: true });
         else
             super(option);

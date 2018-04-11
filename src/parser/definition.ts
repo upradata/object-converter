@@ -1,6 +1,6 @@
 export type KeyType = number | string;
 
-export type FunctionPartial<Return> = (key?: number | string, element?: any, level?: number, done?: boolean) => Return;
+export type FunctionPartial<Return> = (key?: number | string, element?: any, level?: number, last?: boolean) => Return;
 export type Visitor = FunctionPartial<any>;
 
 export class VisitorRecursive {

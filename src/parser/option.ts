@@ -1,6 +1,6 @@
 import { Visitor, VisitorRecursive } from './definition';
 import { Returnable, ReturnableConstructable } from './returnable';
-import { isBoolean } from 'util';
+import * as check from 'is-check';
 
 
 export interface OptionProperties {
@@ -35,7 +35,7 @@ export class Option {
         this._elementOption = option.elementOption || option.object || option.array || option.properties;
 
 
-        if (isBoolean(this._elementOption))
+        if (check.isBoolean(this._elementOption))
             this._all = this._elementOption;
 
 

@@ -1,10 +1,13 @@
-import { Element, IteratorElement } from '../element';
-import { Option } from '../option';
+// import { Element, IteratorElement } from '../element';
+// import { Option } from '../option';
 
-export class NullElement extends Element {
+export class NullElement/*  extends Element */ {
 
     constructor() {
-        super(undefined, undefined, undefined);
+        //  super(undefined, undefined, undefined);
     }
 
+    /* public next(): IteratorResult<IteratorElement> {
+        return undefined;
+    } */
 }

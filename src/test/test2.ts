@@ -1,4 +1,4 @@
-import { Element } from '../parser/element';
+import { ElementFactory } from '../parser/element-factory';
 import { Option, OptionProperties } from '../parser/option';
 import * as emojisJson from 'emoji-datasource/emoji.json';
 
@@ -15,13 +15,13 @@ import { ExecOptions } from 'child_process';
 
 const test = {
     stringify: true,
-    few_Few_WithVisitor_And_Aliases: false,
-    all_Null_Remover: false,
-    all_Null_Remover_Recursive: false,
-    few_Few_WithVisitor: false,
-    few_Few: false,
-    few_All: false,
-    all: false,
+    few_Few_WithVisitor_And_Aliases: true,
+    all_Null_Remover: true,
+    all_Null_Remover_Recursive: true,
+    few_Few_WithVisitor: true,
+    few_Few: true,
+    few_All: true,
+    all: true,
 };
 
 
@@ -107,33 +107,37 @@ const jsonDir = path.resolve('json-test');
 
 
 if (test.all) {
-    const all = Element.create(emojisJson, extractionAll).parse();
-    console.log(JSON.stringify(all) === JSON.stringify(emojisJson));
+    const all = ElementFactory.create(emojisJson, extractionAll).parse();
+    console.log('all', JSON.stringify(all) === JSON.stringify(emojisJson));
 
-    $writeJson(path.join(jsonDir, 'emojis-all.json'), Element.create(emojisJson, extractionAll).parse()).then(
+    /* $writeJson(path.join(jsonDir, 'emojis-all.json'), Element.create(emojisJson, extractionAll).parse()).then(
         fileName => console.log(`${fileName} done :)`),
         err => console.error(err)
-    );
+    ); */
 }
 
 
-if (test.few_All)
-    $writeJson(path.join(jsonDir, 'emojis-few-all.json'), Element.create(emojisJson, extractionFew_All).parse()).then(
+if (test.few_All) {
+    const fewAll = ElementFactory.create(emojisJson, extractionFew_All).parse();
+    console.log('few all', JSON.stringify(fewAll) === JSON.stringify(require('../../json-ref/emojis-few-all.json')));
+
+    /* $writeJson(path.join(jsonDir, 'emojis-few-all.json'), Element.create(emojisJson, extractionFew_All).parse()).then(
         fileName => console.log(`${fileName} done :)`),
         err => console.error(err)
-    );
+    ); */
+}
 
+if (test.few_Few) {
+    const fewFew = ElementFactory.create(emojisJson, extractionFew_Few).parse();
+    console.log('few few', JSON.stringify(fewFew) === JSON.stringify(require('../../json-ref/emojis-few-few.json')));
 
-if (test.few_Few)
-    $writeJson(path.join(jsonDir, 'emojis-few-few.json'), Element.create(emojisJson, extractionFew_Few).parse()).then(
+    /* $writeJson(path.join(jsonDir, 'emojis-few-few.json'), Element.create(emojisJson, extractionFew_Few).parse()).then(
         fileName => console.log(`${fileName} :)`),
         err => console.error(err)
-    );
+    ); */
+}
 
 
-const a = {
-    mutate: (key: string, name: string, level: number) => 'Ta mere LA PUTE : ' + name
-} as LiteralOption;
 
 const extractionFew_Few_WithVisitor = {
 
@@ -154,7 +158,7 @@ const extractionFew_Few_WithVisitor = {
                         unified: true,
                         image: {
                             mutate: (key: string, image: string, level: number) => 'L IMAGE qui tue : ' + image
-                        } as LiteralOption,
+                        } as LiteralOptionProperties,
                         sheet_x: true
                     } as ObjectOptionProperties
 
@@ -170,12 +174,15 @@ const extractionFew_Few_WithVisitor = {
 
 
 
-if (test.few_Few_WithVisitor)
-    $writeJson(path.join(jsonDir, 'emoji-few-few-with-visitor.json'), Element.create(emojisJson, extractionFew_Few_WithVisitor).parse()).then(
+if (test.few_Few_WithVisitor) {
+    const fewFewVisitor = ElementFactory.create(emojisJson, extractionFew_Few_WithVisitor).parse();
+    console.log('few few visitor', JSON.stringify(fewFewVisitor) === JSON.stringify(require('../../json-ref/emojis-few-few-with-visitor.json')));
+
+    /* $writeJson(path.join(jsonDir, 'emojis-few-few-with-visitor.json'), Element.create(emojisJson, extractionFew_Few_WithVisitor).parse()).then(
         fileName => console.log(`${fileName} :)`),
         err => console.error(err)
-    );
-
+    ); */
+}
 
 const extractionFew_Few_WithVisitor_And_Aliases = {
 
@@ -212,10 +219,10 @@ const extractionFew_Few_WithVisitor_And_Aliases = {
 
 
 if (test.few_Few_WithVisitor_And_Aliases) {
-    const noAlias = Element.create(emojisJson, extractionFew_Few_WithVisitor).parse();
-    const alias = Element.create(emojisJson, extractionFew_Few_WithVisitor_And_Aliases).parse();
+    const noAlias = ElementFactory.create(emojisJson, extractionFew_Few_WithVisitor).parse();
+    const alias = ElementFactory.create(emojisJson, extractionFew_Few_WithVisitor_And_Aliases).parse();
 
-    console.log(JSON.stringify(noAlias) === JSON.stringify(alias));
+    console.log('few few visitor and alias (properties, object, list, ...)', JSON.stringify(noAlias) === JSON.stringify(alias));
 }
 
 
@@ -253,11 +260,15 @@ const extractionAll_Null_Remover = {
 } as ArrayOptionProperties;
 
 
-if (test.all_Null_Remover)
-    $writeJson(path.join(jsonDir, 'emojis_all_null_remover.json'), Element.create(emojisJson, extractionAll_Null_Remover).parse()).then(
+if (test.all_Null_Remover) {
+    const nullRemover = ElementFactory.create(emojisJson, extractionAll_Null_Remover).parse();
+    console.log('null remover', JSON.stringify(nullRemover) === JSON.stringify(require('../../json-ref/emojis_all_null_remover.json')));
+
+    /* $writeJson(path.join(jsonDir, 'emojis_all_null_remover.json'), Element.create(emojisJson, extractionAll_Null_Remover).parse()).then(
         fileName => console.log(`${fileName} :)`),
         err => console.error(err)
-    );
+    ); */
+}
 
 
 
@@ -275,16 +286,16 @@ const extractionAll_Null_Remover_Recursive = {
 
 
 if (test.all_Null_Remover_Recursive) {
-    /*     $writeJson(path.join(jsonDir, 'emojis_all_null_remover_recursive.json'), Element.create(emojisJson, extractionAll_Null_Remover_Recursive).parse()).then(
-            fileName => console.log(`${fileName} :)`),
-            err => console.error(err)
-        );
-     */
+    const noRecursive = ElementFactory.create(emojisJson, extractionAll_Null_Remover).parse();
+    const recursive = ElementFactory.create(emojisJson, extractionAll_Null_Remover_Recursive).parse();
 
-    const noRecursive = Element.create(emojisJson, extractionAll_Null_Remover).parse();
-    const recursive = Element.create(emojisJson, extractionAll_Null_Remover_Recursive).parse();
+    console.log('null remover recursive', JSON.stringify(noRecursive) === JSON.stringify(require('../../json-ref/emojis_all_null_remover_recursive.json')));
+    console.log('null remover recursive', JSON.stringify(noRecursive) === JSON.stringify(recursive));
 
-    console.log(JSON.stringify(noRecursive) === JSON.stringify(recursive));
+    /* $writeJson(path.join(jsonDir, 'emojis_all_null_remover_recursive.json'), Element.create(emojisJson, extractionAll_Null_Remover_Recursive).parse()).then(
+        fileName => console.log(`${fileName} :)`),
+        err => console.error(err)
+    ); */
 }
 
 
@@ -394,15 +405,19 @@ const extractionFew_Few_PrettyStringify = {
 
 
 if (test.stringify) {
-    const stringified = Element.create(require('../../json-test/emojis-few-few'), extractionFew_Few_PrettyStringify).parse();
+    const stringified = ElementFactory.create(require('../../json-test/emojis-few-few'), extractionFew_Few_PrettyStringify).parse();
     const fileName = path.join(jsonDir, 'emojis_few_few_stringify.json');
 
-    fs.ensureFile(fileName)
+
+    console.log('stringify', stringified === JSON.stringify(require('../../json-ref/emojis_few_few_stringify.json'), null, 4));
+
+
+    /* fs.ensureFile(fileName)
         .then(
         () => fs.writeFile(fileName, stringified).then(
             () => console.log(`${fileName} :)`),
             err => Promise.reject(err)),
 
-        err => console.error(err));
+        err => console.error(err)); */
 
 }

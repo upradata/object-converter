@@ -1,6 +1,5 @@
 import { Option, OptionProperties } from '../option';
 import { LiteralReturnable } from '../returnable';
-import { isBoolean } from 'util';
 import { Literal } from '../definition';
 
 export interface LiteralOptionProperties extends OptionProperties {
@@ -10,7 +9,7 @@ export interface LiteralOptionProperties extends OptionProperties {
 
 export class LiteralOption extends Option {
     constructor(option: LiteralOptionProperties | boolean) {
-        if (isBoolean(option))
+        if (typeof option === 'boolean')
             super({ all: true });
         else
             super(option);

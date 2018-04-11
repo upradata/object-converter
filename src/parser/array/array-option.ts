@@ -1,8 +1,6 @@
 import { Option, OptionProperties } from '../option';
 import { LiteralInString, Literal } from '../definition';
 import { ArrayReturnable } from '../returnable';
-import { isBoolean } from 'util';
-
 
 
 export interface ArrayOptionProperties extends OptionProperties {
@@ -14,7 +12,7 @@ export interface ArrayOptionProperties extends OptionProperties {
 
 export class ArrayOption extends Option {
     constructor(option: ArrayOptionProperties | boolean) {
-        if (isBoolean(option))
+        if (typeof option === 'boolean')
             super({ all: true });
         else
             super(option);
