@@ -1,23 +1,65 @@
 {
-  "name": "json-object-parser",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Thomas Milotti",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^9.4.7",
-    "emoji-datasource": "^4.0.3",
-    "fs-extra": "^5.0.0",
-    "typescript": "^2.7.2"
-  },
-  "dependencies": {
-    "colors": "^1.2.1",
-    "common-tags": "^1.7.2",
-    "is-check": "^1.0.2",
-    "reflect-metadata": "^0.1.12"
-  }
+    "name": "@upradata/object-convert",
+    "version": "1.0.7",
+    "author": {
+        "name": "Thomas Milotti",
+        "email": "thomas.milotti@gmail.com",
+        "url": "https://github.com/milottit"
+    },
+    "repository": {
+        "url": "https://github.com/upradata/util"
+    },
+    "description": "Convert Js object with transformers",
+    "sideEffects": false,
+    "main": "lib",
+    "types": "lib-esm",
+    "module": "lib-esm",
+    "files": [
+        "lib",
+        "lib-esm"
+    ],
+    "scripts": {
+        "clean": "shx rm -rf lib lib-esm",
+        "pre-build": "pnpm run clean",
+        "build": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
+        "post-build": "pnpm run test && npm run e2e",
+        "watch": "pnpm run build:watch",
+        "build:watch": "concurrently 'tsc -p tsconfig.lib.json -w' 'tsc -p tsconfig.lib-esm.json -w'",
+        "test": "pnpm jest --passWithNoTests --verbose false --config jest-ut.config.js",
+        "e2e": "pnpm jest --passWithNoTests --verbose false --config jest-e2e.config.js",
+        "github-push": "pnpm run build && npm version patch && git pushall && git pushall-tags",
+        "npm-publish": "pnpm run build && npm publish --access public"
+    },
+    "license": "ISC",
+    "devDependencies": {
+        "@types/jest": "^27.0.1",
+        "@types/node": "^16.6.1",
+        "concurrently": "^6.2.1",
+        "emoji-datasource": "^7.0.2",
+        "fs-extra": "^10.0.0",
+        "jest": "^27.0.6",
+        "ts-jest": "^27.0.4",
+        "ts-node": "^10.2.0",
+        "typescript": "^4.3.5"
+    },
+    "dependencies": {
+        "colors": "^1.4.0",
+        "common-tags": "^1.8.0",
+        "is-check": "^1.0.2",
+        "reflect-metadata": "^0.1.13"
+    },
+    "keywords": [
+        "typescript",
+        "javascript",
+        "json",
+        "parser"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "local": {
+        "dependencies": {
+            "@upradata/util": "link:/home/milottit/Libraries/Upra-Data/util@11.2.9"
+        }
+    }
 }

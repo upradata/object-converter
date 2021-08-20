@@ -1,42 +1,39 @@
 import { Element, IteratorElement } from '../element';
-import { ObjectOption } from './object-option';
+import { ObjectConvertOptions, ObjectOptions } from './object-options';
+
 
 export class ObjectElement extends Element {
     private index = -1;
 
-    constructor(json: {}, option: ObjectOption, level: number) {
-        super(json, option, level);
+    constructor(value: {}, options: ObjectConvertOptions | boolean, level: number) {
+        super(value, new ObjectOptions(options), level);
     }
 
 
 
     public next(): IteratorResult<IteratorElement> {
-        let keys: string[];
+        const getKeys = (): string[] => {
 
-        if (this.option.all)
-            keys = Object.getOwnPropertyNames(this.json);
-        else
-            keys = Object.getOwnPropertyNames(this.option.elementOption).filter(key => this.json[key] !== undefined);
+            // if (this.options.all)
+            return Object.getOwnPropertyNames(this.value);
 
+            // return Object.getOwnPropertyNames(this.options.specific).filter(key => isDefined(this.value[ key ]));
+        };
+
+        const keys = getKeys();
 
         ++this.index;
 
         if (this.index < keys.length) {
-            const key = keys[this.index];
+            const key = keys[ this.index ];
 
             return {
                 done: false,
-                value: [key, this.json[key], this.index === keys.length - 1]
+                value: { key, value: this.value[ key ], isLast: this.index === keys.length - 1, isLeaf: false }
             };
         }
 
         return { done: true, value: null };
-
-
-        /*  if (this.option.all)
-             return this.nextAll();
- 
-         return this.nextPartial(); */
     }
 
 
@@ -51,7 +48,7 @@ export class ObjectElement extends Element {
 
 
     private *iteratortAll(): IterableIterator<IteratorElement> {
-        const entries = Object.entries(this.json);
+        const entries = Object.entries(this.value);
         let index = 0;
 
         for (const [key, elmt] of entries)
@@ -61,12 +58,12 @@ export class ObjectElement extends Element {
 
 
     private *iteratorPartial(): IterableIterator<IteratorElement> {
-        const keys = Object.keys(this.option.elementOption).filter(key => this.json[key] !== undefined);
+        const keys = Object.keys(this.option.optionsOption).filter(key => this.value[key] !== undefined);
         let index = 0;
 
         for (const key of keys) {
-           // if (this.json[key] !== undefined) {
-                yield [key, this.json[key], ++index === keys.length];
+           // if (this.value[key] !== undefined) {
+                yield [key, this.value[key], ++index === keys.length];
           //  }
         }
     }

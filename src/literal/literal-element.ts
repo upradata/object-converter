@@ -1,13 +1,13 @@
+import { Literal } from '../types';
 import { Element, IteratorElement } from '../element';
-import { LiteralType } from '../definition';
-import { LiteralOption } from './literal-option';
-import { NullElement } from '../null/null-element';
+import { LiteralConvertOptions, LiteralOptions } from './literal-options';
+
 
 export class LiteralElement extends Element {
     private done = false;
 
-    constructor(json: LiteralType, option: LiteralOption, level: number) {
-        super(json, option, level);
+    constructor(protected value: Literal, options: LiteralConvertOptions | boolean, level: number) {
+        super(value, new LiteralOptions(options), level);
     }
 
 
@@ -17,7 +17,7 @@ export class LiteralElement extends Element {
 
             return {
                 done: false,
-                value: [this.json, new NullElement(), true]
+                value: { key: null, value: this.value, isLast: true, isLeaf: true }
             };
 
         }
@@ -29,13 +29,13 @@ export class LiteralElement extends Element {
     }
 
     /* impossible for es5 compatibility :(
- 
+
     public *[Symbol.iterator](): IterableIterator<IteratorElement> {
-       //  let key: string = typeof this.json;
- 
+       //  let key: string = typeof this.value;
+
        // if (key === 'object')
        //     key = 'null';
-        
-    yield [this.json, new NullElement(), true];
+
+    yield [this.value, new NullElement(), true];
     } */
 }

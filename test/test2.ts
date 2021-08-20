@@ -1,16 +1,15 @@
-import { ElementFactory } from '../parser/element-factory';
-import { Option, OptionProperties } from '../parser/option';
+import { ElementFactory } from '../src/parser/element-factory';
+import { Option, OptionProperties } from '../src/parser/option';
 import * as emojisJson from 'emoji-datasource/emoji.json';
 
-import { ArrayOptionProperties } from '../parser/array/array-option';
-import { ObjectOptionProperties, MembersOptionProperties } from '../parser/object/object-option';
-import { LiteralOptionProperties, LiteralOption } from '../parser/litral/literal-option';
+import { ArrayOptionProperties } from '../src/parser/array/array-option';
+import { ObjectOptionProperties, MembersOptionProperties } from '../src/parser/object/object-option';
+import { LiteralOptionProperties, LiteralOption } from '../src/parser/litral/literal-option';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { KeyType, VisitorRecursive } from '../parser/definition';
-import { Returnable } from '../parser/returnable';
-import { ExecOptions } from 'child_process';
+import { KeyType, VisitorRecursive } from '../src/parser/definition';
+import { Returnable } from '../src/parser/returnable';
 
 
 const test = {
@@ -119,7 +118,7 @@ if (test.all) {
 
 if (test.few_All) {
     const fewAll = ElementFactory.create(emojisJson, extractionFew_All).parse();
-    console.log('few all', JSON.stringify(fewAll) === JSON.stringify(require('../../json-ref/emojis-few-all.json')));
+    console.log('few all', JSON.stringify(fewAll) === JSON.stringify(require('../src/json-ref/emojis-few-all.json')));
 
     /* $writeJson(path.join(jsonDir, 'emojis-few-all.json'), Element.create(emojisJson, extractionFew_All).parse()).then(
         fileName => console.log(`${fileName} done :)`),
@@ -129,7 +128,7 @@ if (test.few_All) {
 
 if (test.few_Few) {
     const fewFew = ElementFactory.create(emojisJson, extractionFew_Few).parse();
-    console.log('few few', JSON.stringify(fewFew) === JSON.stringify(require('../../json-ref/emojis-few-few.json')));
+    console.log('few few', JSON.stringify(fewFew) === JSON.stringify(require('../src/json-ref/emojis-few-few.json')));
 
     /* $writeJson(path.join(jsonDir, 'emojis-few-few.json'), Element.create(emojisJson, extractionFew_Few).parse()).then(
         fileName => console.log(`${fileName} :)`),
@@ -176,7 +175,7 @@ const extractionFew_Few_WithVisitor = {
 
 if (test.few_Few_WithVisitor) {
     const fewFewVisitor = ElementFactory.create(emojisJson, extractionFew_Few_WithVisitor).parse();
-    console.log('few few visitor', JSON.stringify(fewFewVisitor) === JSON.stringify(require('../../json-ref/emojis-few-few-with-visitor.json')));
+    console.log('few few visitor', JSON.stringify(fewFewVisitor) === JSON.stringify(require('../src/json-ref/emojis-few-few-with-visitor.json')));
 
     /* $writeJson(path.join(jsonDir, 'emojis-few-few-with-visitor.json'), Element.create(emojisJson, extractionFew_Few_WithVisitor).parse()).then(
         fileName => console.log(`${fileName} :)`),
@@ -203,7 +202,7 @@ const extractionFew_Few_WithVisitor_And_Aliases = {
                         unified: true,
                         image: {
                             mutate: (key: string, image: string, level: number) => 'L IMAGE qui tue : ' + image
-                        } as LiteralOption,
+                        } as LiteralOptionProperties,
                         sheet_x: true
                     } as ObjectOptionProperties
 
@@ -262,7 +261,7 @@ const extractionAll_Null_Remover = {
 
 if (test.all_Null_Remover) {
     const nullRemover = ElementFactory.create(emojisJson, extractionAll_Null_Remover).parse();
-    console.log('null remover', JSON.stringify(nullRemover) === JSON.stringify(require('../../json-ref/emojis_all_null_remover.json')));
+    console.log('null remover', JSON.stringify(nullRemover) === JSON.stringify(require('../src/json-ref/emojis_all_null_remover.json')));
 
     /* $writeJson(path.join(jsonDir, 'emojis_all_null_remover.json'), Element.create(emojisJson, extractionAll_Null_Remover).parse()).then(
         fileName => console.log(`${fileName} :)`),
@@ -289,7 +288,7 @@ if (test.all_Null_Remover_Recursive) {
     const noRecursive = ElementFactory.create(emojisJson, extractionAll_Null_Remover).parse();
     const recursive = ElementFactory.create(emojisJson, extractionAll_Null_Remover_Recursive).parse();
 
-    console.log('null remover recursive', JSON.stringify(noRecursive) === JSON.stringify(require('../../json-ref/emojis_all_null_remover_recursive.json')));
+    console.log('null remover recursive', JSON.stringify(noRecursive) === JSON.stringify(require('../src/json-ref/emojis_all_null_remover_recursive.json')));
     console.log('null remover recursive', JSON.stringify(noRecursive) === JSON.stringify(recursive));
 
     /* $writeJson(path.join(jsonDir, 'emojis_all_null_remover_recursive.json'), Element.create(emojisJson, extractionAll_Null_Remover_Recursive).parse()).then(
@@ -321,7 +320,7 @@ class ArrayToString extends Indent implements Returnable {
 
     push(key: KeyType, elmt: string | number | undefined | null, level: number, done: boolean) {
         let elt = elmt;
-        if (typeof elmt === 'string' && elmt[0] !== '{' && elmt[0] !== '[')
+        if (typeof elmt === 'string' && elmt[ 0 ] !== '{' && elmt[ 0 ] !== '[')
             elt = `"${elt}"`;
 
 
@@ -348,7 +347,7 @@ class ObjectToString extends Indent implements Returnable {
 
     push(key: KeyType, elmt: string | number | undefined | null, level: number, done: boolean) {
         let elt = elmt;
-        if (typeof elmt === 'string' && elmt[0] !== '{' && elmt[0] !== '[')
+        if (typeof elmt === 'string' && elmt[ 0 ] !== '{' && elmt[ 0 ] !== '[')
             elt = `"${elt}"`;
 
         if (done)
@@ -405,11 +404,11 @@ const extractionFew_Few_PrettyStringify = {
 
 
 if (test.stringify) {
-    const stringified = ElementFactory.create(require('../../json-test/emojis-few-few'), extractionFew_Few_PrettyStringify).parse();
+    const stringified = ElementFactory.create(require('../src/json-test/emojis-few-few'), extractionFew_Few_PrettyStringify).parse();
     const fileName = path.join(jsonDir, 'emojis_few_few_stringify.json');
 
 
-    console.log('stringify', stringified === JSON.stringify(require('../../json-ref/emojis_few_few_stringify.json'), null, 4));
+    console.log('stringify', stringified === JSON.stringify(require('../src/json-ref/emojis_few_few_stringify.json'), null, 4));
 
 
     /* fs.ensureFile(fileName)
