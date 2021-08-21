@@ -1,4 +1,4 @@
-import { convert, ConvertOptions, ObjectConvertOptions } from '.';
+import { convert, Options, ObjectConvertOptions } from '.';
 
 
 /* const options: ConvertOptions = {

@@ -7,7 +7,7 @@
         "url": "https://github.com/milottit"
     },
     "repository": {
-        "url": "https://github.com/upradata/util"
+        "url": "https://github.com/upradata/object-converter"
     },
     "description": "Convert Js object with transformers",
     "sideEffects": false,

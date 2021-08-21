@@ -1,14 +1,14 @@
 import { isDefined } from '@upradata/util';
 
-import { Transformer, RecursiveTransformer, TypeOf } from './types';
+import { RecursiveTransformer, TypeOf, Transform } from './types';
 import { ReturnableConstructor } from './returnable';
 
-type Transform<T = unknown> = Transformer<T> | RecursiveTransformer<T>;
 
-export type ConvertOptsBase = {
-    filter?: Transform<boolean>;
-    mutate?: Transform;
-    overwrite?: Transform<Omit<ConvertOptsBase, 'overwrite'>>;
+export type OptsBase<T = unknown, U = unknown> = {
+    next?: OptsBase<T, U>;
+    filter?: Transform<T, boolean>;
+    mutate?: Transform<T, U>;
+    get?: Transform<Omit<OptsBase<T>, 'get'>>;
     // specific?: T; // Option[];
     // synonyms of element
     // object?: unknown;
@@ -22,27 +22,29 @@ export type ConvertOptsBase = {
 
 
 
-export class ConvertOptionsBase {
-    readonly filter: RecursiveTransformer<boolean>;
-    readonly mutate: RecursiveTransformer;
-    readonly overwrite?: RecursiveTransformer<Omit<ConvertOptsBase, 'overwrite'>>;
+export class OptionsBase<T = unknown, U = unknown> {
+    readonly next?: OptsBase<T, U>;
+    readonly filter: RecursiveTransformer<T, boolean>;
+    readonly mutate: RecursiveTransformer<T, U>;
+    readonly get?: RecursiveTransformer<Omit<OptsBase<T, U>, 'get'>, U>;
 
 
-    constructor(options: ConvertOptsBase) {
-        const { overwrite, mutate, filter, includes } = options;
+    constructor(options: OptsBase<T, U>) {
+        const { get, mutate, filter, includes, next } = options;
 
-        this.mutate = new RecursiveTransformer(mutate || ((_index: number, value: unknown) => value));
-        this.filter = new RecursiveTransformer(filter || ((_index: number, _value: unknown) => includes || true));
-        if (isDefined(overwrite))
-            this.overwrite = new RecursiveTransformer(overwrite);
+        this.next = next;
+        this.mutate = new RecursiveTransformer(mutate || ((_index: number, value: T) => value as any));
+        this.filter = new RecursiveTransformer(filter || ((_index: number, _value: T) => includes || true));
+        if (isDefined(get))
+            this.get = new RecursiveTransformer(get as any);
     }
 }
 
 
 
-export type ConvertOptsDetails<T = unknown> = Partial<
-    Record<TypeOf, ConvertOptsBase> &
-    (T extends {} | [] ? Record<keyof T, ConvertOptsBase> : {})
+export type OptsDetails<T = unknown, U = unknown> = Partial<
+    Record<TypeOf, OptsBase<T, U>> &
+    (T extends {} | [] ? Record<keyof T, OptsBase<T, U>> : {})
 >;
 
-export type ConvertOptions<T = unknown> = ConvertOptsBase & ConvertOptsDetails<T>;
+export type Options<T = unknown, U = unknown> = OptsBase<T, U> & OptsDetails<T, U>;

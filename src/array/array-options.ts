@@ -1,26 +1,34 @@
-import { isBoolean } from '@upradata/util';
+import { isBoolean, isDefined } from '@upradata/util';
 import { Key, typeOf } from '../types';
 import { ElementOptions } from '../element-options';
-import { ConvertOptsBase, ConvertOptions } from '../options.types';
+import { OptsBase, Options } from '../options.types';
 import { ArrayReturnable } from '../returnable';
 
 
-export type ArrayConvertOptions = ConvertOptions; /* <{
+export type ArrayConvertOptions = Options; /* <{
     // elements of array can be anything
     [ K in TypeOfLiterals | 'object' | 'array' ]?: ConvertOptions } | ConvertOptions | boolean
-> */;
+> */
 
 
 export class ArrayOptions extends ElementOptions {
     constructor(options: ArrayConvertOptions | boolean) {
         super({
-            ...(isBoolean(options) ? { includes: true } as ConvertOptsBase : options),
+            ...(isBoolean(options) ? { includes: true } as OptsBase : options),
             returnableCtor: ArrayReturnable
         });
     }
 
 
-    protected getDetailedOptions(_key: Key, value: unknown): ConvertOptsBase {
-        return this.details[ typeOf(value) ] || this.base;
+    protected getDetailedOptions(key: Key, value: unknown): OptsBase {
+        const keyOptions = this.details[ key ];
+        const typeOptions = this.details[ typeOf(value) ];
+        const nextOptions = this.base.next;
+
+        if (isDefined(keyOptions || typeOptions || nextOptions)) {
+            return { ...nextOptions, ...typeOptions, ...keyOptions };
+        }
+
+        return this.base;
     }
 }

@@ -1,8 +1,9 @@
 import { isArray, isBoolean, isNull, isNumber, isString, isUndefined } from '@upradata/util';
 import { ArrayElement } from './array';
+import { ConvertOptions } from './convert.types';
 import { LiteralElement } from './literal';
 import { ObjectElement } from './object';
-import { ConvertOptions } from './options.types';
+import { Options } from './options.types';
 import { Literal } from './types';
 
 
@@ -26,7 +27,7 @@ const typeOf = (value: unknown) => {
 
 export class ElementFactory {
 
-    static create(value: unknown, optionsProperties: ConvertOptions | boolean, level = 0) {
+    static create(value: unknown, optionsProperties: Options | boolean, level = 0) {
         switch (typeOf(value)) {
             case 'literal': return new LiteralElement(value as Literal, optionsProperties, level);
             case 'array': return new ArrayElement(value as unknown[], optionsProperties, level);
@@ -37,6 +38,6 @@ export class ElementFactory {
 }
 
 
-export const convert = (value: unknown, optionsProperties?: ConvertOptions | boolean) => {
+export const convert = <T>(value: T, optionsProperties?: ConvertOptions<T>) => {
     return ElementFactory.create(value, optionsProperties).convert();
 };

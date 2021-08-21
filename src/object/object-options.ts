@@ -1,6 +1,6 @@
 import { isBoolean, isDefined } from '@upradata/util';
 import { ElementOptions } from '../element-options';
-import { ConvertOptsBase, ConvertOptions } from '../options.types';
+import { OptsBase, Options } from '../options.types';
 import { ObjectReturnable } from '../returnable';
 import { Key, typeOf } from '../types';
 
@@ -11,26 +11,27 @@ import { Key, typeOf } from '../types';
 /* export type ObjectConvertOptions<T = {}> = ConvertOptions<
     { [ K in TypeOfLiterals | keyof T | 'object' | 'array' ]?: ConvertOptions } | ConvertOptions | boolean
 >; */
-export type ObjectConvertOptions<T = {}> = ConvertOptions<T>;
+export type ObjectConvertOptions<T = {}> = Options<T>;
 
 
 export class ObjectOptions extends ElementOptions {
     constructor(options: ObjectConvertOptions | boolean) {
         super({
-            ...(isBoolean(options) ? { includes: true } as ConvertOptsBase : options),
+            ...(isBoolean(options) ? { includes: true } as OptsBase : options),
             returnableCtor: ObjectReturnable
         });
     }
 
 
-    protected getDetailedOptions(key: Key, value: unknown): ConvertOptsBase {
+    protected getDetailedOptions(key: Key, value: unknown): OptsBase {
 
         // key is prop name of the property (i.e. {a:1} => "a")
         const keyOptions = this.details[ key ];
         const typeOptions = this.details[ typeOf(value) ];
+        const nextOptions = this.base.next;
 
-        if (isDefined(keyOptions) || isDefined(typeOptions))
-            return { ...typeOptions, ...keyOptions };
+        if (isDefined(keyOptions || typeOptions || nextOptions))
+            return { ...nextOptions, ...typeOptions, ...keyOptions };
 
         return this.base;
     }

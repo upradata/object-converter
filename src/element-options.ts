@@ -1,17 +1,17 @@
 import { Key, TransformerDetails } from './types';
-import { ConvertOptions, ConvertOptionsBase, ConvertOptsBase, ConvertOptsDetails } from './options.types';
+import { Options, OptionsBase, OptsBase, OptsDetails } from './options.types';
 import { Returnable } from './returnable';
 
 // type VisitorProps = ExtractKeysType<ConvertOptionsBase, Transformer | RecursiveTransformer>;
 
 
-export class ElementOptions<T = unknown> {
-    readonly base: ConvertOptionsBase;
-    readonly details: ConvertOptsDetails<T>;
+export class ElementOptions<T = unknown, U = unknown> {
+    readonly base: OptionsBase<T, U>;
+    readonly details: OptsDetails<T, U>;
     readonly returnable: Returnable;
 
-    constructor(options: ConvertOptions<T>) {
-        this.base = new ConvertOptionsBase(options);
+    constructor(options: Options<T, U>) {
+        this.base = new OptionsBase(options);
         this.details = options;
 
         const { returnableCtor: ReturnableCtor } = options;
@@ -19,12 +19,12 @@ export class ElementOptions<T = unknown> {
     }
 
 
-    public getOptions(key: Key, value: unknown, details: TransformerDetails): ConvertOptionsBase {
-        const { overwrite } = this.base;
+    public getOptions(key: Key, value: T, details: TransformerDetails): OptionsBase<T, U> {
+        const { get: overwrite } = this.base;
 
         const options = { ... this.getDetailedOptions(key, value), ...overwrite?.transform(key, value, details) };
 
-        return new ConvertOptionsBase(options);
+        return new OptionsBase<T, U>(options);
 
         // pass down the parent options
         // if (isDefined(this.specific))
@@ -38,8 +38,8 @@ export class ElementOptions<T = unknown> {
     }
 
 
-    public getNextOptions(): ConvertOptsBase {
-        const opts = {} as ConvertOptsBase;
+    public getNextOptions(): OptsBase<T, U> {
+        const opts = {} as OptsBase<T, U>;
 
         for (const [ key, transformer ] of Object.entries(this.base)) {
 
@@ -52,7 +52,7 @@ export class ElementOptions<T = unknown> {
     }
 
 
-    protected getDetailedOptions(_key: Key, _json: unknown): ConvertOptsBase {
+    protected getDetailedOptions(_key: Key, _json: unknown): OptsBase<T, U> {
         return undefined;
     }
 }

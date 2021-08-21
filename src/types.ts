@@ -1,21 +1,21 @@
-import { isArray, isDefined, isNull } from '@upradata/util';
+import { isArray, isDefined, isNull, ObjectOf } from '@upradata/util';
 
 
 export type Key = number | string;
 
 export type TransformerDetails = { level: number; isLast: boolean; isLeaf: boolean; };
-export type Transformer<R = unknown> = (key?: number | string, element?: unknown, details?: TransformerDetails) => R;
+export type Transformer<T = unknown, R = unknown> = (key?: number | string, element?: T, details?: TransformerDetails) => R;
 
 
 const isTransformerRecursive = (transformer: any): transformer is RecursiveTransformer => {
     return transformer instanceof RecursiveTransformer || isDefined(transformer?.transform);
 };
 
-export class RecursiveTransformer<R = unknown> {
-    transform: Transformer<R>;
+export class RecursiveTransformer<T = unknown, R = unknown> {
+    transform: Transformer<T, R>;
     recursive?: boolean = false;
 
-    constructor(transform: RecursiveTransformer<R> | Transformer<R>, recursive?: boolean) {
+    constructor(transform: RecursiveTransformer<T, R> | Transformer<T, R>, recursive?: boolean) {
         if (isTransformerRecursive(transform)) {
             Object.assign(this, transform);
         } else {
@@ -28,11 +28,14 @@ export class RecursiveTransformer<R = unknown> {
     }
 }
 
-export const makeRecursiveTransform = <R>(transform: RecursiveTransformer<R> | Transformer<R>): RecursiveTransformer<R> => new RecursiveTransformer(transform, true);
+export type Transform<T = unknown, R = unknown> = Transformer<T, R> | RecursiveTransformer<T, R>;
+
+
+export const makeRecursiveTransform = <T, R>(transform: Transform<T, R>): RecursiveTransformer<T, R> => new RecursiveTransformer(transform, true);
 
 
 
-interface _Literals {
+export interface _Literals {
     number: number;
     string: string;
     boolean: boolean;
@@ -45,6 +48,10 @@ export type Literal = _Literals[ keyof _Literals ];
 export type TypeOfLiterals = keyof _Literals;
 
 export type TypeOf = TypeOfLiterals | 'array' | 'object';
+
+
+export type Type<T extends TypeOf> = T extends 'array' ? Array<unknown> : T extends 'object' ? ObjectOf<unknown> : _Literals[ T & TypeOfLiterals ];
+
 
 export const typeOf = (value: unknown): TypeOf => {
     if (isNull(value))
