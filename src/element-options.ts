@@ -1,17 +1,17 @@
-import { Key, TransformerDetails } from './types';
-import { Options, OptionsBase, OptsBase, OptsDetails } from './options.types';
+import { Key, RecursiveProp, TransformerDetails } from './types';
+import { Options, BaseOptions, BaseOpts, DetailsOpts } from './options';
 import { Returnable } from './returnable';
 
 // type VisitorProps = ExtractKeysType<ConvertOptionsBase, Transformer | RecursiveTransformer>;
 
 
-export class ElementOptions<T = unknown, U = unknown> {
-    readonly base: OptionsBase<T, U>;
-    readonly details: OptsDetails<T, U>;
+export class ElementOptions<T = unknown, U = T> {
+    readonly base: BaseOptions<T, U>;
+    readonly details: DetailsOpts<T, U>;
     readonly returnable: Returnable;
 
     constructor(options: Options<T, U>) {
-        this.base = new OptionsBase(options);
+        this.base = new BaseOptions(options);
         this.details = options;
 
         const { returnableCtor: ReturnableCtor } = options;
@@ -19,40 +19,34 @@ export class ElementOptions<T = unknown, U = unknown> {
     }
 
 
-    public getOptions(key: Key, value: T, details: TransformerDetails): OptionsBase<T, U> {
-        const { get: overwrite } = this.base;
+    public getOptions(key: Key, value: T, details: TransformerDetails): BaseOptions<T, U> {
+        const { options: opts } = this.base;
 
-        const options = { ... this.getDetailedOptions(key, value), ...overwrite?.transform(key, value, details) };
+        const options = {
+            ...this.base,
+            ...this.getDetailedOptions(key, value),
+            ...opts?.value(key, value, details)
+        };
 
-        return new OptionsBase<T, U>(options);
-
-        // pass down the parent options
-        // if (isDefined(this.specific))
-        // return this.specific;
-
-        // default
-        /* if (this.all)
-            return this.setVisitorRecursiveOptions({ all: true }); */
-
-        // throw new Error('Impossible');
+        return new BaseOptions<T, U>(options);
     }
 
 
-    public getNextOptions(): OptsBase<T, U> {
-        const opts = {} as OptsBase<T, U>;
+    public getNextOptions(overrideOptions?: RecursiveProp<BaseOpts>): BaseOpts {
+        const opts = {} as BaseOpts<T, U>;
 
-        for (const [ key, transformer ] of Object.entries(this.base)) {
+        for (const [ key, value ] of Object.entries({ ...this.base, next: overrideOptions })) {
 
-            if (transformer?.recursive) {
-                opts[ key ] = transformer;
+            if (value?.recursive) {
+                opts[ key ] = value;
             }
         }
 
-        return opts;
+        return { ...opts, ...this.base.next.value, ...overrideOptions.value };
     }
 
 
-    protected getDetailedOptions(_key: Key, _json: unknown): OptsBase<T, U> {
+    protected getDetailedOptions(_key: Key, _json: unknown): BaseOpts<T, U> {
         return undefined;
     }
 }

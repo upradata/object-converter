@@ -1,6 +1,7 @@
-import { Key, TransformerDetails } from './types';
+import { Key, RecursiveProp, TransformerDetails } from './types';
 import type { ElementFactory } from './element-factory';
 import { ElementOptions } from './element-options';
+import { BaseOpts } from './options';
 
 
 export interface IteratorElement {
@@ -28,12 +29,19 @@ export abstract class Element implements Iterator<IteratorElement>  {
             const { key, value, isLast, isLeaf } = iterator.value;
             const details = { level: this.level, isLast, isLeaf };
 
-            const { filter, mutate } = this.options.getOptions(key, value, details);
+            const { filter, mutate, next, options } = this.options.getOptions(key, value, details);
 
-            if (filter.transform(key, value, details)) {
-                const parsedElmt = this.parseNext(key, value, details);
-                const visitedElmt = mutate.transform(key, parsedElmt, details);
-                returnable.push(key, visitedElmt, details);
+            if (filter.value(key, value, details)) {
+
+                const mutatedValue = mutate.value(key, value, details);
+
+                const parsedValue = this.parseNext(
+                    mutatedValue,
+                    { ...next, ...(options?.recursive ? options as RecursiveProp<BaseOpts> : {}) },
+                    details
+                );
+
+                returnable.push(key, parsedValue, details);
             }
         }
 
@@ -44,14 +52,14 @@ export abstract class Element implements Iterator<IteratorElement>  {
 
 
 
-    private parseNext(key: Key, value: unknown, details: TransformerDetails) {
+    private parseNext(value: unknown, nextOptions: RecursiveProp<BaseOpts>, details: TransformerDetails) {
         // End of recursive loop
         if (details.isLeaf)
             return value;
 
         return Element.lazyElementFactory().create(
             value,
-            this.options.getNextOptions(), // this.options.getOptions(key, value, details),
+            this.options.getNextOptions(nextOptions), // this.options.getOptions(key, value, details),
             this.level + 1).convert();
     }
 

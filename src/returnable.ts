@@ -1,9 +1,9 @@
 import { ObjectOf } from '@upradata/util';
-import { Transformer, Key, Literal } from './types';
+import { SimpleTransformer, Key, Literal } from './types';
 
 
 export interface Returnable<T = unknown> {
-    push: Transformer;
+    push: SimpleTransformer;
     value(): T;
 }
 

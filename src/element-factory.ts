@@ -1,9 +1,8 @@
 import { isArray, isBoolean, isNull, isNumber, isString, isUndefined } from '@upradata/util';
 import { ArrayElement } from './array';
-import { ConvertOptions } from './convert.types';
 import { LiteralElement } from './literal';
 import { ObjectElement } from './object';
-import { Options } from './options.types';
+import { Options, ConvertOptions } from './options';
 import { Literal } from './types';
 
 
@@ -25,19 +24,22 @@ const typeOf = (value: unknown) => {
     return 'object';
 };
 
+
 export class ElementFactory {
 
-    static create(value: unknown, optionsProperties: Options | boolean, level = 0) {
+    static create(value: unknown, options: Options | boolean, level = 0) {
         switch (typeOf(value)) {
-            case 'literal': return new LiteralElement(value as Literal, optionsProperties, level);
-            case 'array': return new ArrayElement(value as unknown[], optionsProperties, level);
-            case 'object': return new ObjectElement(value, optionsProperties, level);
+            case 'literal': return new LiteralElement(value as Literal, options, level);
+            case 'array': return new ArrayElement(value as unknown[], options, level);
+            case 'object': return new ObjectElement(value, options, level);
             default:
         }
     }
 }
 
 
-export const convert = <T>(value: T, optionsProperties?: ConvertOptions<T>) => {
-    return ElementFactory.create(value, optionsProperties).convert();
+// U = T is a little trick to bypass a bug. We want U being the type of "value"
+// and not the opposite
+export const convert = <T, U = T>(value: T, options?: ConvertOptions<U>) => {
+    return ElementFactory.create(value, options).convert();
 };
