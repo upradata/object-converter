@@ -1,5 +1,5 @@
 import { isNumber, isString } from '@upradata/util';
-import { convert, ConvertOptions, RecursiveTransformer, makeRecursiveTransform } from '../src';
+import { convert, ConvertOptions, RecursiveValue, makeRecursive } from '../src';
 import { Data, data } from './data';
 
 
@@ -33,7 +33,7 @@ describe('object converter', () => {
     it('recursive option "mutate" should work', () => {
         const options: ConvertOptions<Data> = {
             mutate: {
-                transform: (key, value, { isLeaf }) => {
+                value: (key, value, { isLeaf }) => {
                     if (!isLeaf && (isString(value) || isNumber(value)))
                         return `${key} => ${value}`;
 
@@ -52,7 +52,7 @@ describe('object converter', () => {
         };
 
         expect(convert(data(), options)).toEqual(expected);
-        expect(convert(data(), { mutate: makeRecursiveTransform(options.mutate) })).toEqual(expected);
+        expect(convert(data(), { mutate: makeRecursive(options.mutate) })).toEqual(expected);
     });
 
 
@@ -74,7 +74,7 @@ describe('object converter', () => {
     it('recursive option "filter" should work', () => {
         const options: ConvertOptions<Data> = {
             filter: {
-                transform: (key, _value, { isLeaf }) => {
+                value: (key, _value, { isLeaf }) => {
                     return isLeaf || [ 'a', 'c', 1, 2, 'c2' ].some(k => k === key);
                 },
                 recursive: true
@@ -88,7 +88,7 @@ describe('object converter', () => {
         };
 
         expect(convert(data(), options)).toEqual(expected);
-        expect(convert(data(), { filter: new RecursiveTransformer(options.filter, true) })).toEqual(expected);
+        expect(convert(data(), { filter: new RecursiveValue(options.filter, true) })).toEqual(expected);
     });
 
 
@@ -113,7 +113,7 @@ describe('object converter', () => {
     it('recursive option "next" should work', () => {
         const options: ConvertOptions<Data> = {
             next: {
-                filter: makeRecursiveTransform((key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key))
+                filter: makeRecursive((key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key))
             }
         };
 
@@ -166,7 +166,7 @@ describe('object converter', () => {
 
     it('recursive option "options" should work', () => {
         const options: ConvertOptions<Data> = {
-            options: makeRecursiveTransform((key, value) => {
+            options: makeRecursive((key, value) => {
                 if (key === 'a')
                     return { mutate: () => `${key} => ${value}` };
 
@@ -193,7 +193,7 @@ describe('object converter', () => {
         const options: ConvertOptions<Data> = {
             object: {
                 filter: {
-                    transform: (key, _value) => `${key}`.startsWith('c'),
+                    value: (key, _value) => `${key}`.startsWith('c'),
                     recursive: true
                 }
             },
@@ -201,7 +201,7 @@ describe('object converter', () => {
                 mutate: (key, value) => `${key} => ${value}`
             },
             mutate: {
-                transform: (key, value, { isLeaf }) => !isLeaf && typeof value === 'string' ? `${key} <> ${value}` : value,
+                value: (key, value, { isLeaf }) => !isLeaf && typeof value === 'string' ? `${key} <> ${value}` : value,
                 recursive: true
             }
         };

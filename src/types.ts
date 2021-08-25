@@ -3,85 +3,45 @@ import { isArray, isDefined, isNull, ObjectOf } from '@upradata/util';
 
 export type Key = number | string;
 
-export type TransformerDetails = { level: number; isLast: boolean; isLeaf: boolean; };
-export type SimpleTransformer<T = unknown, R = unknown> = (key?: number | string, element?: T, details?: TransformerDetails) => R;
+export type LevelDetails = { level: number; isLast: boolean; isLeaf: boolean; };
+export type SimpleTransformer<T = unknown, R = unknown> = (key?: Key, value?: T, details?: LevelDetails) => R;
 
 
-const isRecursiveProp = (v: any): v is RecursiveProp<any> => {
-    return v instanceof RecursiveProp || isDefined(v?.value);
+export type RecursiveValueOpts<T = unknown> = RecursiveValue<T> | T;
+
+export const isRecursiveValue = (v: any): v is RecursiveValue => {
+    return v instanceof RecursiveValue || isDefined((v as RecursiveValue)?.value);
 };
 
-
-export type RecursivePropOpts<T> = RecursiveProp<T> | T;
-
-export class RecursiveProp<T> {
+export class RecursiveValue<T = unknown> {
     value: T;
     recursive?: boolean = false;
 
-    constructor(options: RecursivePropOpts<T>) {
-        Object.assign(this, isRecursiveProp(options) ? options : { value: options });
-    }
-}
-
-
-export type RecursiveTransformerOpts<T = unknown, R = unknown> = {
-    transform: SimpleTransformer<T, R>;
-    recursive?: boolean;
-} | RecursivePropOpts<SimpleTransformer<T, R>>;
-
-
-export class RecursiveTransformer<T = unknown, R = unknown> extends RecursiveProp<SimpleTransformer<T, R>>{
-
-    constructor(options: RecursiveTransformerOpts<T, R>, recursive?: boolean) {
-
-        const getOptions = () => {
-            if (typeof options === 'function')
-                return { value: options, recursive: !!recursive };
-
-            if (isRecursiveProp(options))
-                return options;
-
-            return { value: options.transform, recursive: !!recursive || options.recursive };
-        };
-
-        super(getOptions());
-    }
-}
-
-
-/* export class RecursiveTransformer2<T = unknown, R = unknown> {
-    transform: SimpleTransformer<T, R>;
-    recursive?: boolean = false;
-
-    constructor(transform: RecursiveTransformer<T, R> | SimpleTransformer<T, R>, recursive?: boolean) {
-        if (isRecursiveProp(transform)) {
-            Object.assign(this, transform);
-        } else {
-            this.transform = transform;
-            this.recursive = false;
-        }
+    constructor(options: RecursiveValueOpts<T>, recursive?: boolean) {
+        Object.assign(this, (isRecursiveValue(options) ? options : { value: options }));
 
         if (isDefined(recursive))
             this.recursive = recursive;
     }
-} */
+}
 
-// export type Transformer<T = unknown, R = unknown> = SimpleTransformer<T, R> | RecursiveTransformer<T, R>;
 
-export const makeRecursive = <T>(options: RecursivePropOpts<T>): RecursiveProp<T> => {
-    return new RecursiveProp(options);
+export type RecursiveTransformer<T = unknown, R = unknown> = RecursiveValue<SimpleTransformer<T, R>>;
+export type RecursiveTransformerOpts<T = unknown, R = unknown> = RecursiveValueOpts<SimpleTransformer<T, R>>;
+
+
+export const makeRecursive = <T>(options: RecursiveValueOpts<T>): RecursiveValue<T> => {
+    return new RecursiveValue(options, true);
 };
-
-export const makeRecursiveTransform = <T, R>(transform: RecursiveTransformerOpts<T, R>): RecursiveTransformer<T, R> => {
-    return new RecursiveTransformer(transform, true);
-};
-
 
 
 export interface _Literals {
     number: number;
+    bigint: bigint;
     string: string;
     boolean: boolean;
+    symbol: Symbol;
+    function: Function;
     undefined: undefined;
     null: null;
 }
@@ -103,8 +63,5 @@ export const typeOf = (value: unknown): TypeOf => {
     if (isArray(value))
         return 'array';
 
-    if (typeof value === 'bigint')
-        return 'number';
-
-    return typeof value as any;
+    return typeof value;
 };

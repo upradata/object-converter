@@ -6,7 +6,7 @@ import { LiteralConvertOptions, LiteralOptions } from './literal-options';
 export class LiteralElement extends Element {
     private done = false;
 
-    constructor(protected value: Literal, options: LiteralConvertOptions | boolean, level: number) {
+    constructor(protected value: Literal, options: LiteralConvertOptions /* | boolean */, level: number) {
         super(value, new LiteralOptions(options), level);
     }
 

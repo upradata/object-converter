@@ -1,7 +1,7 @@
-import { Key, RecursiveProp, TransformerDetails } from './types';
+import { Key, RecursiveValue } from './types';
 import type { ElementFactory } from './element-factory';
 import { ElementOptions } from './element-options';
-import { BaseOpts } from './options';
+import { BaseOpts, Node } from './options';
 
 
 export interface IteratorElement {
@@ -23,25 +23,25 @@ export abstract class Element implements Iterator<IteratorElement>  {
     constructor(protected value: unknown, public options: ElementOptions, protected level: number) { }
 
     public convert(): unknown {
-        const { returnable } = this.options;
+        const { concatenator: returnable } = this.options;
 
         for (let iterator = this.next(); !iterator.done; iterator = this.next()) {
             const { key, value, isLast, isLeaf } = iterator.value;
-            const details = { level: this.level, isLast, isLeaf };
+            const levelDetails = { level: this.level, isLast, isLeaf };
 
-            const { filter, mutate, next, options } = this.options.getOptions(key, value, details);
+            const { filter, mutate, next, options } = this.options.getOptions(key, value, levelDetails);
 
-            if (filter.value(key, value, details)) {
+            if (filter.value(key, value, levelDetails)) {
 
-                const mutatedValue = mutate.value(key, value, details);
+                const mutatedValue = mutate.value(key, value, levelDetails);
 
                 const parsedValue = this.parseNext(
-                    mutatedValue,
-                    { ...next, ...(options?.recursive ? options as RecursiveProp<BaseOpts> : {}) },
-                    details
+                    { key, value: mutatedValue, levelDetails },
+                    { ...next, ...(options?.recursive ? options.value : {}) },
+
                 );
 
-                returnable.push(key, parsedValue, details);
+                returnable.push(key, parsedValue, levelDetails);
             }
         }
 
@@ -52,14 +52,16 @@ export abstract class Element implements Iterator<IteratorElement>  {
 
 
 
-    private parseNext(value: unknown, nextOptions: RecursiveProp<BaseOpts>, details: TransformerDetails) {
+    private parseNext(node: Node, nextOptions: RecursiveValue<BaseOpts>) {
+        const { value, levelDetails } = node;
+
         // End of recursive loop
-        if (details.isLeaf)
+        if (levelDetails.isLeaf)
             return value;
 
         return Element.lazyElementFactory().create(
             value,
-            this.options.getNextOptions(nextOptions), // this.options.getOptions(key, value, details),
+            this.options.getNextOptions(node, nextOptions), // this.options.getOptions(key, value, details),
             this.level + 1).convert();
     }
 

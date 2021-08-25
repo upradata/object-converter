@@ -5,7 +5,7 @@ import { ObjectConvertOptions, ObjectOptions } from './object-options';
 export class ObjectElement extends Element {
     private index = -1;
 
-    constructor(value: {}, options: ObjectConvertOptions | boolean, level: number) {
+    constructor(value: {}, options: ObjectConvertOptions /*  | boolean */, level: number) {
         super(value, new ObjectOptions(options), level);
     }
 

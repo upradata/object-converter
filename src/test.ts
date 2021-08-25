@@ -1,5 +1,6 @@
+import { LiteralConcatenator } from './concatenator';
 import { isNumber, isString } from '@upradata/util';
-import { convert, ConvertOptions } from '.';
+import { convert, ConvertOptions, Key, LevelDetails, makeRecursive, Concatenator } from '.';
 
 export interface Data {
     a: number;
@@ -63,7 +64,7 @@ const converted = convert({
     }
 }; */
 
-const options: ConvertOptions<Data> = {
+/* const options: ConvertOptions<Data> = {
     options: (key, value) => {
         if (key === 'a')
             return { mutate: (key, value) => `${key} => ${value}` };
@@ -103,3 +104,93 @@ const expected = {
 
 
 console.log({ expected, converted });
+ */
+
+
+
+class Indenter {
+    private _indent: number;
+
+    constructor(indent = 4) {
+        this._indent = indent;
+    }
+
+    indent(level: number) {
+        return ' '.repeat((level) * this._indent);
+    }
+}
+
+
+abstract class ToString extends Concatenator<unknown, string> {
+    private indenter: Indenter;
+    protected container: string;
+
+
+    constructor(opener: string, private closer: string, indent = 4) {
+        super();
+        this.container = `${opener}\n`;
+        this.indenter = new Indenter(indent);
+
+    }
+
+    push(key: Key, value: unknown, { isLast, level }: LevelDetails) {
+        const isNew = typeof value === 'string' && value[ 0 ] !== '{' && value[ 0 ] !== '[';
+        const v = this.getValue(key, value, isNew);
+
+        if (isLast)
+            this.container += `${this.indenter.indent(level + 1)}${v}\n${this.indenter.indent(level)}${this.closer}`;
+        else
+            this.container += `${this.indenter.indent(level + 1)}${v},\n`;
+
+    }
+
+    abstract getValue(key: Key, value: unknown, isNew: boolean): string;
+
+    value() {
+        return this.container;
+    }
+}
+
+
+class ArrayToString extends ToString {
+    constructor() {
+        super('[', ']');
+
+    }
+
+    getValue(_key: Key, value: unknown, isNew: boolean) {
+        return isNew ? `"${value}"` : `${value}`;
+    }
+
+    value() {
+        return this.container;
+    }
+}
+
+
+class ObjectToString extends ToString {
+    constructor() {
+        super('{', '}');
+
+    }
+
+    getValue(key: Key, value: unknown, _isNew: boolean) {
+        return `"${key}": ${value}`;
+    }
+
+    value() {
+        return this.container;
+    }
+}
+
+
+const o = convert({
+    a: 1,
+    b: 'b',
+    c: [ 'c', 2, { c1: 3, c2: [ 4, '5' ], c3: '3' } ],
+    d: { d1: 6, d2: 'd2' }
+}, {
+    concatenatorCtor: makeRecursive((_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator)
+});
+
+console.log(o);

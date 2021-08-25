@@ -6,7 +6,7 @@ export class ArrayElement extends Element {
     private index = -1;
 
 
-    constructor(protected value: unknown[], options: ArrayConvertOptions | boolean, level: number) {
+    constructor(protected value: unknown[], options: ArrayConvertOptions /* | boolean */, level: number) {
         super(value, new ArrayOptions(options), level);
     }
 

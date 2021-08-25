@@ -1,17 +1,17 @@
-import { isBoolean } from '@upradata/util';
 import { Key, typeOf } from '../types';
 import { ElementOptions } from '../element-options';
 import { BaseOpts, Options } from '../options';
-import { ArrayReturnable } from '../returnable';
+import { ArrayConcatenator } from '../concatenator';
 
 
 export type ArrayConvertOptions = Options;
 
 export class ArrayOptions extends ElementOptions {
-    constructor(options: ArrayConvertOptions | boolean) {
+    constructor(options: ArrayConvertOptions) {
         super({
-            ...(isBoolean(options) ? { includes: true } as BaseOpts : options),
-            returnableCtor: ArrayReturnable
+            // ...(isBoolean(options) ? { includes: true } as BaseOpts : options),
+            concatenatorCtor: ArrayConcatenator,
+            ...options
         });
     }
 

@@ -27,7 +27,7 @@ const typeOf = (value: unknown) => {
 
 export class ElementFactory {
 
-    static create(value: unknown, options: Options | boolean, level = 0) {
+    static create(value: unknown, options: Options /* | boolean */, level = 0) {
         switch (typeOf(value)) {
             case 'literal': return new LiteralElement(value as Literal, options, level);
             case 'array': return new ArrayElement(value as unknown[], options, level);
@@ -39,7 +39,14 @@ export class ElementFactory {
 
 
 // U = T is a little trick to bypass a bug. We want U being the type of "value"
-// and not the opposite
+// and not the opposite.
 export const convert = <T, U = T>(value: T, options?: ConvertOptions<U>) => {
-    return ElementFactory.create(value, options).convert();
+    return ElementFactory.create(value, {
+        ...options,
+        parent: {
+            key: null,
+            value,
+            levelDetails: { level: -1, isLast: false, isLeaf: false }
+        }
+    }).convert();
 };

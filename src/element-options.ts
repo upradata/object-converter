@@ -1,25 +1,27 @@
-import { Key, RecursiveProp, TransformerDetails } from './types';
-import { Options, BaseOptions, BaseOpts, DetailsOpts } from './options';
-import { Returnable } from './returnable';
+import { Key, LevelDetails, RecursiveValue } from './types';
+import { Options, BaseOptions, BaseOpts, DetailsOpts, Node, Parent } from './options';
+import { Concatenator } from './concatenator';
 
 // type VisitorProps = ExtractKeysType<ConvertOptionsBase, Transformer | RecursiveTransformer>;
 
 
-export class ElementOptions<T = unknown, U = T> {
+export abstract class ElementOptions<T = unknown, U = T> {
     readonly base: BaseOptions<T, U>;
     readonly details: DetailsOpts<T, U>;
-    readonly returnable: Returnable;
+    readonly concatenator: Concatenator;
 
     constructor(options: Options<T, U>) {
         this.base = new BaseOptions(options);
         this.details = options;
 
-        const { returnableCtor: ReturnableCtor } = options;
-        this.returnable = new ReturnableCtor();
+        const { parent } = options;
+        const Concatenator = this.base.concatenatorCtor.value(parent.key, parent.value, parent.levelDetails);
+
+        this.concatenator = new Concatenator();
     }
 
 
-    public getOptions(key: Key, value: T, details: TransformerDetails): BaseOptions<T, U> {
+    public getOptions(key: Key, value: T, details: LevelDetails): BaseOptions<T, U> {
         const { options: opts } = this.base;
 
         const options = {
@@ -32,8 +34,8 @@ export class ElementOptions<T = unknown, U = T> {
     }
 
 
-    public getNextOptions(overrideOptions?: RecursiveProp<BaseOpts>): BaseOpts {
-        const opts = {} as BaseOpts<T, U>;
+    public getNextOptions<U>(parentNode: Node<U>, overrideOptions?: RecursiveValue<BaseOpts>): BaseOpts & Parent {
+        const opts = {} as BaseOpts;
 
         for (const [ key, value ] of Object.entries({ ...this.base, next: overrideOptions })) {
 
@@ -42,11 +44,9 @@ export class ElementOptions<T = unknown, U = T> {
             }
         }
 
-        return { ...opts, ...this.base.next.value, ...overrideOptions.value };
+        return { ...opts, ...this.base.next.value, ...overrideOptions.value, parent: parentNode };
     }
 
 
-    protected getDetailedOptions(_key: Key, _json: unknown): BaseOpts<T, U> {
-        return undefined;
-    }
+    protected abstract getDetailedOptions(_key: Key, _json: unknown): BaseOpts<T, U>;
 }

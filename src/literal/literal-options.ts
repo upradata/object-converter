@@ -1,17 +1,17 @@
-import { isBoolean } from '@upradata/util';
 import { typeOf } from '../types';
 import { ElementOptions } from '../element-options';
 import { BaseOpts, Options } from '../options';
-import { LiteralReturnable } from '../returnable';
+import { LiteralConcatenator } from '../concatenator';
 
 export type LiteralConvertOptions = Options;
 
 
 export class LiteralOptions extends ElementOptions {
-    constructor(options: LiteralConvertOptions | boolean) {
+    constructor(options: LiteralConvertOptions) {
         super({
-            ...(isBoolean(options) ? { includes: true } as BaseOpts : options),
-            returnableCtor: LiteralReturnable
+            // ...(isBoolean(options) ? { includes: true } as BaseOpts : options),
+            concatenatorCtor: LiteralConcatenator,
+            ...options
         });
     }
 
