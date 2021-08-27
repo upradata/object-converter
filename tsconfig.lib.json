@@ -9,7 +9,6 @@
     ],
     "exclude": [
         "node_modules",
-        /* "!node_modules/yargs", */
         "src/**/*.example.ts",
         "src/**/*.spec.ts"
     ]

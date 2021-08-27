@@ -5,12 +5,12 @@ import { Concatenator } from './concatenator';
 // type VisitorProps = ExtractKeysType<ConvertOptionsBase, Transformer | RecursiveTransformer>;
 
 
-export abstract class ElementOptions<T = unknown, U = T> {
-    readonly base: BaseOptions<T, U>;
-    readonly details: DetailsOpts<T, U>;
+export abstract class ElementOptions<T = unknown /* , U = T */> {
+    readonly base: BaseOptions; // <T, U>;
+    readonly details: DetailsOpts; // <T, U>;
     readonly concatenator: Concatenator;
 
-    constructor(options: Options<T, U>) {
+    constructor(options: Options/* <T, U> */) {
         this.base = new BaseOptions(options);
         this.details = options;
 
@@ -21,7 +21,7 @@ export abstract class ElementOptions<T = unknown, U = T> {
     }
 
 
-    public getOptions(key: Key, value: T, details: LevelDetails): BaseOptions<T, U> {
+    public getOptions(key: Key, value: T, details: LevelDetails): BaseOptions/* <T, U> */ {
         const { options: opts } = this.base;
 
         const options = {
@@ -30,11 +30,11 @@ export abstract class ElementOptions<T = unknown, U = T> {
             ...opts?.value(key, value, details)
         };
 
-        return new BaseOptions<T, U>(options);
+        return new BaseOptions/* <T, U> */(options);
     }
 
 
-    public getNextOptions<U>(parentNode: Node<U>, overrideOptions?: RecursiveValue<BaseOpts>): BaseOpts & Parent {
+    public getNextOptions/* <U> */(parentNode: Node/* <U> */, overrideOptions?: RecursiveValue<BaseOpts>): BaseOpts & Parent {
         const opts = {} as BaseOpts;
 
         for (const [ key, value ] of Object.entries({ ...this.base, next: overrideOptions })) {
@@ -48,5 +48,5 @@ export abstract class ElementOptions<T = unknown, U = T> {
     }
 
 
-    protected abstract getDetailedOptions(_key: Key, _json: unknown): BaseOpts<T, U>;
+    protected abstract getDetailedOptions(_key: Key, _json: unknown): BaseOpts/* <T, U> */;
 }

@@ -3,7 +3,7 @@ import { BaseOpts, Options } from '../options';
 import { ObjectConcatenator } from '../concatenator';
 import { Key, typeOf } from '../types';
 
-export type ObjectConvertOptions<T = {}> = Options<T>;
+export type ObjectConvertOptions<T = {}> = Options<Key, T>;
 
 
 export class ObjectOptions extends ElementOptions {

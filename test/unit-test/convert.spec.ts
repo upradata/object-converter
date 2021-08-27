@@ -1,6 +1,6 @@
 import { isNumber, isString } from '@upradata/util';
-import { convert, ConvertOptions, RecursiveValue, makeRecursive } from '../src';
-import { Data, data } from './data';
+import { convert, ConvertOptions, RecursiveValue, makeRecursive, makeRecursiveTransform, Key } from '../../src';
+import { Data, data } from '../data';
 
 
 
@@ -52,7 +52,7 @@ describe('object converter', () => {
         };
 
         expect(convert(data(), options)).toEqual(expected);
-        expect(convert(data(), { mutate: makeRecursive(options.mutate) })).toEqual(expected);
+        expect(convert(data(), { mutate: makeRecursiveTransform(options.mutate) })).toEqual(expected);
     });
 
 
@@ -113,7 +113,7 @@ describe('object converter', () => {
     it('recursive option "next" should work', () => {
         const options: ConvertOptions<Data> = {
             next: {
-                filter: makeRecursive((key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key))
+                filter: makeRecursiveTransform((key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key))
             }
         };
 
@@ -140,7 +140,7 @@ describe('object converter', () => {
                             filter: (key, _value) => [ 1, 2 ].some(k => k === key),
                             mutate: (key, value, { isLeaf }) => {
                                 if (!isLeaf && (isString(value) || isNumber(value)))
-                                    return `${key} !! ${value}`;
+                                    return `${String(key)} !! ${value}`;
 
                                 return value;
                             }
@@ -166,7 +166,7 @@ describe('object converter', () => {
 
     it('recursive option "options" should work', () => {
         const options: ConvertOptions<Data> = {
-            options: makeRecursive((key, value) => {
+            options: makeRecursive((key: Key, value) => {
                 if (key === 'a')
                     return { mutate: () => `${key} => ${value}` };
 
@@ -193,7 +193,7 @@ describe('object converter', () => {
         const options: ConvertOptions<Data> = {
             object: {
                 filter: {
-                    value: (key, _value) => `${key}`.startsWith('c'),
+                    value: (key, _value) => `${String(key)}`.startsWith('c'),
                     recursive: true
                 }
             },

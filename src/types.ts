@@ -1,10 +1,10 @@
 import { isArray, isDefined, isNull, ObjectOf } from '@upradata/util';
 
 
-export type Key = number | string;
+export type Key = number | string | symbol | null;
 
 export type LevelDetails = { level: number; isLast: boolean; isLeaf: boolean; };
-export type SimpleTransformer<T = unknown, R = unknown> = (key?: Key, value?: T, details?: LevelDetails) => R;
+export type SimpleTransformer<K extends Key = Key, T = unknown, R = unknown> = (key?: K, value?: T, details?: LevelDetails) => R;
 
 
 export type RecursiveValueOpts<T = unknown> = RecursiveValue<T> | T;
@@ -26,11 +26,15 @@ export class RecursiveValue<T = unknown> {
 }
 
 
-export type RecursiveTransformer<T = unknown, R = unknown> = RecursiveValue<SimpleTransformer<T, R>>;
-export type RecursiveTransformerOpts<T = unknown, R = unknown> = RecursiveValueOpts<SimpleTransformer<T, R>>;
+export type RecursiveTransformer<K extends Key = Key, T = unknown, R = unknown> = RecursiveValue<SimpleTransformer<K, T, R>>;
+export type RecursiveTransformerOpts<K extends Key = Key, T = unknown, R = unknown> = RecursiveValueOpts<SimpleTransformer<K, T, R>>;
 
 
 export const makeRecursive = <T>(options: RecursiveValueOpts<T>): RecursiveValue<T> => {
+    return new RecursiveValue(options, true);
+};
+
+export const makeRecursiveTransform = <K extends Key = Key, T = unknown, R = unknown>(options: RecursiveTransformerOpts<K, T, R>): RecursiveTransformer<K, T, R> => {
     return new RecursiveValue(options, true);
 };
 
@@ -40,7 +44,7 @@ export interface _Literals {
     bigint: bigint;
     string: string;
     boolean: boolean;
-    symbol: Symbol;
+    symbol: symbol;
     function: Function;
     undefined: undefined;
     null: null;

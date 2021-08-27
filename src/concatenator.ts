@@ -2,9 +2,6 @@ import { isNil, ObjectOf } from '@upradata/util';
 import { Key, Literal, LevelDetails } from './types';
 
 
-// export type Push<T = unknown> = (key?: Key, value?: T, details?: LevelDetails) => void;
-
-
 export const ConcatenatorSymbol = Symbol('Concatenator class');
 
 export abstract class Concatenator<T = unknown, U = T> {
@@ -30,12 +27,15 @@ export const isConcatenatorClass = (v: any): v is Concatenator => {
 export type ConcatenatorCtor<T = unknown, U = T> = new () => Concatenator<T, U>;
 
 
-export class ArrayConcatenator extends Concatenator<unknown[]> {
+export class ArrayConcatenator<T = unknown> extends Concatenator<T, T[]> {
+    private container: T[] = [];
 
-    private container: unknown[] = [];
+    // it seems useless, but typescript typing is not able to induced that ArrayConcatenator type is ConcatenatorCtor
+    // without defining explicitly a constructor !!!!!
+    constructor() { super(); }
 
-    push(key: Key, elmt: unknown[]) {
-        this.container.push(elmt);
+    push(key: Key, value: T) {
+        this.container.push(value);
     }
 
     value() {
@@ -44,11 +44,15 @@ export class ArrayConcatenator extends Concatenator<unknown[]> {
 }
 
 
-export class ObjectConcatenator extends Concatenator<ObjectOf<unknown>> {
-    private container: ObjectOf<unknown> = {};
+export class ObjectConcatenator<T = unknown> extends Concatenator<T, ObjectOf<T>> {
+    private container: ObjectOf<T> = {};
 
-    push(key: Key, elmt: ObjectOf<any>) {
-        this.container[ key ] = elmt;
+    // it seems useless, but typescript typing is not able to induced that ArrayConcatenator type is ConcatenatorCtor
+    // without defining explicitly a constructor !!!!!
+    constructor() { super(); }
+
+    push(key: Key, value: T) {
+        this.container[ key as string ] = value;
     }
 
 
@@ -59,11 +63,15 @@ export class ObjectConcatenator extends Concatenator<ObjectOf<unknown>> {
 
 
 
-export class LiteralConcatenator extends Concatenator<Literal> {
-    private container: Literal;
+export class LiteralConcatenator<T extends Literal = any> extends Concatenator<T> {
+    private container: T;
 
-    push(_key: Key, elmt: Literal) {
-        this.container = elmt;
+    // it seems useless, but typescript typing is not able to induced that ArrayConcatenator type is ConcatenatorCtor
+    // without defining explicitly a constructor !!!!!
+    constructor() { super(); }
+
+    push(_key: Key, value: T) {
+        this.container = value;
     }
 
     value() {

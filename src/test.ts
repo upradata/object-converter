@@ -1,6 +1,6 @@
-import { LiteralConcatenator } from './concatenator';
 import { isNumber, isString } from '@upradata/util';
-import { convert, ConvertOptions, Key, LevelDetails, makeRecursive, Concatenator } from '.';
+import { convert, ConvertOptions, Key, LevelDetails, makeRecursive, makeRecursiveTransform, LiteralConcatenator, Concatenator, ConcatenatorCtor } from '.';
+import emojis from '../test/data/emoji.json';
 
 export interface Data {
     a: number;
@@ -175,7 +175,7 @@ class ObjectToString extends ToString {
     }
 
     getValue(key: Key, value: unknown, _isNew: boolean) {
-        return `"${key}": ${value}`;
+        return `"${String(key)}": ${value}`;
     }
 
     value() {
@@ -190,7 +190,46 @@ const o = convert({
     c: [ 'c', 2, { c1: 3, c2: [ 4, '5' ], c3: '3' } ],
     d: { d1: 6, d2: 'd2' }
 }, {
-    concatenatorCtor: makeRecursive((_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator)
+    concatenatorCtor: makeRecursiveTransform((_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator)
 });
 
 console.log(o);
+
+interface Emoji {
+    name: string;
+    unified: string;
+    non_qualified: string;
+    docomo: string;
+    au: string;
+    softbank: string;
+    google: string;
+    image: string;
+    sheet_x: number;
+    sheet_y: number;
+    short_name: string;
+    short_names: string[];
+    text: string;
+    texts: string;
+    category: string;
+    subcategory: string;
+    sort_order: number;
+    added_in: string;
+    has_img_apple: boolean;
+    has_img_google: boolean;
+    has_img_twitter: boolean;
+    has_img_facebook: boolean;
+}
+
+
+convert(emojis as Emoji[], {
+    filter: makeRecursiveTransform((key, value, _details) => value !== null)
+});
+
+
+
+
+
+convert({ a: 1, b: [ 1, 2 ] }, {
+    filter: makeRecursiveTransform((key, value, _details) => value !== null),
+    concatenatorCtor: (_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator
+});
