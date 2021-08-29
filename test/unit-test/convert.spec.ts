@@ -1,5 +1,5 @@
 import { isNumber, isString } from '@upradata/util';
-import { convert, ConvertOptions, RecursiveValue, makeRecursive, makeRecursiveTransform, Key } from '../../src';
+import { convert, ConvertOptions, Key } from '../../src';
 import { Data, data } from '../data';
 
 
@@ -52,7 +52,6 @@ describe('object converter', () => {
         };
 
         expect(convert(data(), options)).toEqual(expected);
-        expect(convert(data(), { mutate: makeRecursiveTransform(options.mutate) })).toEqual(expected);
     });
 
 
@@ -88,7 +87,6 @@ describe('object converter', () => {
         };
 
         expect(convert(data(), options)).toEqual(expected);
-        expect(convert(data(), { filter: new RecursiveValue(options.filter, true) })).toEqual(expected);
     });
 
 
@@ -113,7 +111,10 @@ describe('object converter', () => {
     it('recursive option "next" should work', () => {
         const options: ConvertOptions<Data> = {
             next: {
-                filter: makeRecursiveTransform((key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key))
+                filter: {
+                    value: (key, _value, { isLeaf }) => isLeaf || [ 'a', 'c', 1, 2, 'c2', 'd2' ].some(k => k === key),
+                    recursive: true
+                }
             }
         };
 
@@ -137,7 +138,7 @@ describe('object converter', () => {
                 if (key === 'c') {
                     return {
                         next: {
-                            filter: (key, _value) => [ 1, 2 ].some(k => k === key),
+                            filter: (key, _value) => [ 1, 2 ].some(k => k === parseInt(key)),
                             mutate: (key, value, { isLeaf }) => {
                                 if (!isLeaf && (isString(value) || isNumber(value)))
                                     return `${String(key)} !! ${value}`;
@@ -166,16 +167,19 @@ describe('object converter', () => {
 
     it('recursive option "options" should work', () => {
         const options: ConvertOptions<Data> = {
-            options: makeRecursive((key: Key, value) => {
-                if (key === 'a')
-                    return { mutate: () => `${key} => ${value}` };
+            options: {
+                value: (key: Key, value) => {
+                    if (key === 'a')
+                        return { mutate: () => `${key} => ${value}` };
 
-                if (key === 'c2' || key === 'd3')
-                    return { mutate: () => `${key} !! ${value}`, };
+                    if (key === 'c2' || key === 'd3')
+                        return { mutate: () => `${key} !! ${value}`, };
 
-                if ((value as any).d1 === 6)
-                    return { mutate: () => ({ ...(value as { d1: number; d2: string; }), d3: 3 }) };
-            })
+                    if ((value as any).d1 === 6)
+                        return { mutate: () => ({ ...(value as { d1: number; d2: string; }), d3: 3 }) };
+                },
+                recursive: true
+            }
         };
 
         const expected = {

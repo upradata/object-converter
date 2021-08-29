@@ -1,5 +1,5 @@
 import { data } from '../data';
-import { convert, Key, LevelDetails, LiteralConcatenator, Concatenator, makeRecursiveTransform } from '../../src';
+import { convert, Key, LevelDetails, LiteralConcatenator, Concatenator } from '../../src';
 
 
 class Indenter {
@@ -83,9 +83,10 @@ describe('object converter', () => {
 
     it('concatenatorCtor should work', () => {
         const converted = convert(data(), {
-            concatenatorCtor: makeRecursiveTransform(
-                (_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator
-            )
+            concatenatorCtor: {
+                value: (_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator,
+                recursive: true
+            }
         });
 
         // eslint-disable-next-line max-len

@@ -1,4 +1,4 @@
-import { isArray, isDefined, isNull, ObjectOf } from '@upradata/util';
+import { isArray, isDefined, isNull } from '@upradata/util';
 
 
 export type Key = number | string | symbol | null;
@@ -35,7 +35,7 @@ export const makeRecursive = <T>(options: RecursiveValueOpts<T>): RecursiveValue
 };
 
 export const makeRecursiveTransform = <K extends Key = Key, T = unknown, R = unknown>(options: RecursiveTransformerOpts<K, T, R>): RecursiveTransformer<K, T, R> => {
-    return new RecursiveValue(options, true);
+    return new RecursiveValue(options , true);
 };
 
 
@@ -57,7 +57,7 @@ export type TypeOfLiterals = keyof _Literals;
 export type TypeOf = TypeOfLiterals | 'array' | 'object';
 
 
-export type Type<T extends TypeOf> = T extends 'array' ? Array<unknown> : T extends 'object' ? ObjectOf<unknown> : _Literals[ T & TypeOfLiterals ];
+export type GetType<T extends TypeOf> = T extends 'array' ? unknown[] : T extends 'object' ? object : _Literals[ T & TypeOfLiterals ];
 
 
 export const typeOf = (value: unknown): TypeOf => {

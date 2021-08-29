@@ -190,7 +190,10 @@ const o = convert({
     c: [ 'c', 2, { c1: 3, c2: [ 4, '5' ], c3: '3' } ],
     d: { d1: 6, d2: 'd2' }
 }, {
-    concatenatorCtor: makeRecursiveTransform((_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator)
+    concatenatorCtor: {
+        value: (_key, value) => Array.isArray(value) ? ArrayToString : typeof value === 'object' ? ObjectToString : LiteralConcatenator,
+        recursive: true
+    }
 });
 
 console.log(o);

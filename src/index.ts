@@ -6,4 +6,6 @@ export * from './element';
 export * from './literal';
 export * from './object';
 export * from './options';
+export * from './public-options';
+export * from './test';
 export * from './types';

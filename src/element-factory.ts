@@ -2,7 +2,8 @@ import { isArray, isBoolean, isNull, isNumber, isString, isUndefined } from '@up
 import { ArrayElement } from './array';
 import { LiteralElement } from './literal';
 import { ObjectElement } from './object';
-import { Options, ConvertOptions } from './options';
+import { Options } from './options';
+import { ConvertOptions } from './public-options';
 import { Literal } from './types';
 
 
@@ -40,7 +41,7 @@ export class ElementFactory {
 
 // U extends T is a little trick to bypass a bug. We want U being the type of "value"
 // and not the opposite.
-export const convert = <T, U extends T>(value: T, options?: ConvertOptions<U>) => {
+export const convert = <T, U extends T, R = unknown>(value: T, options?: ConvertOptions<U>): R => {
     return ElementFactory.create(value, {
         ...options,
         parent: {
@@ -48,5 +49,5 @@ export const convert = <T, U extends T>(value: T, options?: ConvertOptions<U>) =
             value,
             levelDetails: { level: -1, isLast: false, isLeaf: false }
         }
-    }).convert();
+    } as any).convert() as R;
 };
