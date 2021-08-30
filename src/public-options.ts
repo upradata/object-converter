@@ -36,7 +36,7 @@ type RecursiveValueOpts<T> =
 type RecursiveTransformOpts<K extends Key, T, R = unknown> =
     | Types.SimpleTransformer<K, T, R>
     | RecursiveValue<Types.SimpleTransformer<K, T, R>, false>
-    | RecursiveValue<Types.SimpleTransformer<K, unknown, R>, true>;
+    | RecursiveValue<Types.SimpleTransformer<Key, unknown, R>, true>;
 
 
 type OnlyRecursiveTransformOpts<K extends Key, T, R = unknown> = RecursiveValue<Types.SimpleTransformer<K, T, R>, true>;
@@ -97,13 +97,13 @@ type ExtractType<T, Type> = T[ ExtractTypeKeys<T, Type> ];
 
 /////////////////////////////////////////////
 
-type SimpleKey<Type> = [ Type ] extends [ Type ] ? Type extends null ? Key : Type extends unknown[] ? number  /* : Type extends object ? Key */ : Key : never;
+type SimpleKey<Type> = Type extends null ? Key : Type extends unknown[] ? number  /* : Type extends object ? Key */ : Key;
 
 type _TypeOptions<K extends Key, E, Type, S extends State> =
     // Stop type distribution
     [ K ] extends [ Stop ] ?
     OnlyRecursiveBaseOpts<SimpleKey<Type>, Type, S> :
-    [ K ] extends [ Stop ] ? never :
+    [ true ] extends [ false ] ? never :
     BaseOpts<Exclude<K, Stop>, E, S> & ConvertOptions<E, SetState<S, { isTypeOptions: true; }>>;
 
 type TypeOptions<T, S extends State> = {

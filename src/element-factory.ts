@@ -41,7 +41,7 @@ export class ElementFactory {
 
 // U extends T is a little trick to bypass a bug. We want U being the type of "value"
 // and not the opposite.
-export const convert = <T, U extends T, R = unknown>(value: T, options?: ConvertOptions<U>): R => {
+export const convert = <T, U extends T, R = T>(value: T, options?: ConvertOptions<U>): R => {
     return ElementFactory.create(value, {
         ...options,
         parent: {

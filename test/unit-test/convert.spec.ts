@@ -35,7 +35,7 @@ describe('object converter', () => {
             mutate: {
                 value: (key, value, { isLeaf }) => {
                     if (!isLeaf && (isString(value) || isNumber(value)))
-                        return `${key} => ${value}`;
+                        return `${String(key)} => ${value}`;
 
                     return value;
                 },
@@ -205,7 +205,7 @@ describe('object converter', () => {
                 mutate: (key, value) => `${key} => ${value}`
             },
             mutate: {
-                value: (key, value, { isLeaf }) => !isLeaf && typeof value === 'string' ? `${key} <> ${value}` : value,
+                value: (key, value, { isLeaf }) => !isLeaf && typeof value === 'string' ? `${String(key)} <> ${value}` : value,
                 recursive: true
             }
         };

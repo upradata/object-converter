@@ -44,7 +44,7 @@ export abstract class ElementOptions<T = unknown /* , U = T */> {
             }
         }
 
-        return { ...opts, ...this.base.next.value, ...overrideOptions.value, parent: parentNode };
+        return { ...opts, ...overrideOptions.value, ...this.base.next.value, parent: parentNode };
     }
 
 
