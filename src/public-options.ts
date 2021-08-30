@@ -1,14 +1,30 @@
-import { Levels, IfThenElse, ribute } from '@upradata/util';
+/* eslint-disable spaced-comment */
+import { Levels } from '@upradata/util';
 import { TypeOf, Literal, GetType, Key } from './types';
 import * as Types from './types';
 // import { BaseOpts as OriginalBaseOpts } from './options';
 import { ConcatenatorCtor } from './concatenator';
 
-/*
-type RecursiveValueOpts<T> = RecursiveValue<unknown> | T;
-type RecursiveTransformer<K extends Key = Key, T = unknown, R = unknown> = RecursiveValue<SimpleTransformer<K, T, R>>;
-type RecursiveTransformerOpts<K extends Key = Key, T = unknown, R = unknown> = RecursiveValueOpts<SimpleTransformer<K, T, R>>;
- */
+
+//////////////////////////// State that will be used //////////////////////////////////
+
+type State = {
+    isTypeOptions: boolean;
+    onlyRecursive: boolean;
+    level: number;
+};
+
+type InitState<N extends number> = {
+    isTypeOptions: false;
+    onlyRecursive: false;
+    level: N;
+};
+
+
+type SetState<OldS extends State, NewS extends Partial<State>> = Omit<OldS, keyof NewS> & NewS;
+
+
+//////////////////////////// Redefinition of Options //////////////////////////////////
 
 type RecursiveValue<T, Bool extends boolean = boolean> = Omit<Types.RecursiveValue<T>, 'recursive'> & { recursive?: Bool; };
 
@@ -26,42 +42,29 @@ type RecursiveTransformOpts<K extends Key, T, R = unknown> =
 type OnlyRecursiveTransformOpts<K extends Key, T, R = unknown> = RecursiveValue<Types.SimpleTransformer<K, T, R>, true>;
 
 
-type _BaseOpts<K extends Key, T, Depth extends number = 0> = {
-    /*  [ K2 in keyof OriginalBaseOpts ]?: K2 extends 'includes' ? OriginalBaseOpts[ K2 ] :
-     K2 extends 'next' ? ConvertOptions<T, Depth> :
-     OriginalBaseOpts[ K2 ] extends RecursiveValueOpts<infer U> ?
-     U | ForceRecursiveValue<unknown> :
-     OriginalBaseOpts<K, T>[ K2 ] */
-    next?: ConvertOptions<T, Depth>;
-    filter?: RecursiveTransformOpts<K, T>;
+type _BaseOpts<K extends Key, T, S extends State> = {
+    next?: ConvertOptions<T, S>;
+    filter?: RecursiveTransformOpts<K, T, boolean>;
     mutate?: RecursiveTransformOpts<K, T>;
     includes?: boolean;
     concatenatorCtor?: RecursiveValueOpts<ConcatenatorCtor<T>> | RecursiveTransformOpts<K, T, ConcatenatorCtor<T>>;
 };
 
 
-type BaseOpts<K extends Key = Key, T = unknown, Depth extends number = 0> = _BaseOpts<K, T, Depth> & {
-    options?: RecursiveTransformOpts<K, T, _BaseOpts<K, T, Depth>>;
+type BaseOpts<K extends Key, T, S extends State = InitState<0>> = _BaseOpts<K, T, S> & {
+    options?: RecursiveTransformOpts<K, T, _BaseOpts<K, T, S>>;
 };
 
-type OnlyRecursiveBaseOpts<K extends Key, T, Depth extends number = 0> = {
-    /* [ K2 in keyof OriginalBaseOpts ]?: K2 extends 'includes' ? OriginalBaseOpts[ K2 ] :
-    K2 extends 'next' ? ConvertOptions<T, Depth> :
-    OriginalBaseOpts[ K2 ] extends RecursiveValueOpts<SimpleTransformer> ? RecursiveValueOpts<SimpleTransformer<K, T>> :
-    OriginalBaseOpts[ K2 ] extends RecursiveValueOpts<infer U> ?
-    ForceRecursiveValue<U, true> : never */
-    next?: ConvertOptions<T, Depth>;
-    filter?: OnlyRecursiveTransformOpts<K, T>;
+type OnlyRecursiveBaseOpts<K extends Key, T, S extends State> = {
+    next?: ConvertOptions<T, SetState<S, { onlyRecursive: true; }>>;
+    filter?: OnlyRecursiveTransformOpts<K, T, boolean>;
     mutate?: OnlyRecursiveTransformOpts<K, T>;
     includes?: boolean;
     concatenatorCtor?: RecursiveValue<ConcatenatorCtor<T>> | OnlyRecursiveTransformOpts<K, T, ConcatenatorCtor<T>>;
-    options?: OnlyRecursiveTransformOpts<K, T, _BaseOpts<K, T, Depth>>;
+    options?: OnlyRecursiveTransformOpts<K, T, _BaseOpts<K, T, S>>;
 };
 
-// type AA = BaseOpts<Key, string>[ 'filter' ];
 
-
-/* eslint-disable spaced-comment */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////   Options reflecting the input to convert     //////////////////////////////
@@ -78,49 +81,72 @@ type IsTuple<T> = T extends { length: infer N; } ? number extends N ? false : tr
 type Indices<T> = Exclude<keyof T, keyof unknown[]>;
 type KeyOf<T> = T extends Literal ? never : IsTuple<T> extends true ? Indices<T> : T extends unknown[] ? keyof T & number : keyof T;
 
-type ExtractTypeKeys<T, Type, V = never> = {
-    [ K in KeyOf<T> ]?: T[ K ] extends Type ?
+type ExtractTypeKeys<T, Type, V = never> = [ T ] extends [ T ] ? {
+    [ K in KeyOf<T> ]?: | [ T ] extends [ T ] ?
+    T[ K ] extends unknown[] ? (Type extends unknown[] ? K : V) :
+    T[ K ] extends RegExp ? (Type extends RegExp ? K : V) :
+    T[ K ] extends Type ? K : V : never
+    // T[ K ] extends Type ?
     // when Type is object, any[] and object will pass the test
     // so we are obliged to be sure to fail when any[] extends object
-    T[ K ] extends unknown[] ? (object extends Type ? V : K) : K : V
-}[ KeyOf<T> ];
+    // T[ K ] extends unknown[] ? (object extends Type ? V : K) : K : V
+}[ KeyOf<T> ] : never;
 
 type ExtractType<T, Type> = T[ ExtractTypeKeys<T, Type> ];
 
 
 /////////////////////////////////////////////
 
-type SimpleKey<Type> = Type extends null ? Key : Type extends unknown[] ? number  /* : Type extends object ? Key */ : Key;
+type SimpleKey<Type> = [ Type ] extends [ Type ] ? Type extends null ? Key : Type extends unknown[] ? number  /* : Type extends object ? Key */ : Key : never;
 
-type _TypeOptions<K extends Key, E, Type, Depth extends number = 0> = K extends Stop ? OnlyRecursiveBaseOpts<SimpleKey<Type>, Type, Depth> : BaseOpts<K, E, Depth> & ConvertOptions<E, Depth, false>;
+type _TypeOptions<K extends Key, E, Type, S extends State> =
+    // Stop type distribution
+    [ K ] extends [ Stop ] ?
+    OnlyRecursiveBaseOpts<SimpleKey<Type>, Type, S> :
+    [ K ] extends [ Stop ] ? never :
+    BaseOpts<Exclude<K, Stop>, E, S> & ConvertOptions<E, SetState<S, { isTypeOptions: true; }>>;
 
-type TypeOptions<T = unknown, Depth extends number = 0> = {
-    [ Type in TypeOf ]?: _TypeOptions<ExtractTypeKeys<T, GetType<Type>, Stop>, ExtractType<T, GetType<Type>>, GetType<Type>, Depth>
+type TypeOptions<T, S extends State> = {
+    [ Type in TypeOf ]?: _TypeOptions<
+        ExtractTypeKeys<T, GetType<Type>, Stop>,
+        ExtractType<T, GetType<Type>>,
+        GetType<Type>,
+        S
+    >
 };
 
-type _BaseOptions<T = unknown, Include extends boolean = true, Depth extends number = 0> = IfThenElse<Include, BaseOpts<KeyOf<T>, T[ KeyOf<T> ], Depth>, {}>;
+type _BaseOptions<T, S extends State, O = Exclude<T, Literal>> =
+    S[ 'isTypeOptions' ] extends true ? {} :
+    BaseOpts<KeyOf<O>, O[ KeyOf<O> ] | Extract<T, Literal>, S>;
 
-type ObjectConvertOptions<T, Depth extends number> = {
-    [ K in KeyOf<T> ]?: ConvertOptions<T[ K ], Levels[ Depth ]>;
+
+type ObjectConvertOptions<T, S extends State, O = Exclude<T, Literal>> = {
+    [ K in KeyOf<O> ]?: ConvertOptions<O[ K ], SetState<S, { level: Levels[ S[ 'level' ] ]; }>>;
 };
 
 
 /////////////////////////////////////////////
 
-export type ConvertOptions<T, Depth extends number = 20, AddBaseOptions extends boolean = true> =
+export type ConvertOptions<T, S extends State = InitState<20>> =
     // [ T ] extends [ Literal ] avoid type distribution => C<A|B> and not C<A> | C<B>
     // https://github.com/microsoft/TypeScript/issues/29368
-    [ T ] extends [ Literal ] ? AddBaseOptions extends true ? BaseOpts<null, T> : {} :
-    Depth extends 0 ? TypeOptions<T, Depth> & _BaseOptions<T, AddBaseOptions, Depth> :
-    ObjectConvertOptions<T, Depth> & TypeOptions<T, Depth> & _BaseOptions<T, AddBaseOptions, Depth>;
+    // Sometimes, when T is a union of few types, like when prop "next" is used,  T[ KeyOf<T> ]
+    [ T ] extends [ Literal ] ? S[ 'isTypeOptions' ] extends true ? {} : BaseOpts<null, T> :
+    // Stops type distribution (in each branch of the condition "extends ... ?", we have to disable it)
+    [ true ] extends [ false ] ? never :
+    S[ 'level' ] extends 0 ?
+    TypeOptions<T, S> & _BaseOptions<T, S> :
+    [ true ] extends [ false ] ? never :
+    ObjectConvertOptions<T, S> & TypeOptions<T, S> & _BaseOptions<T, S>;
 
 
-/* eslint-enable spaced-comment */
 
+///////////////    FOR TESTING    ////////////////////
 
-
+/*
 // b: [ number, string ]; c: number;  },  { a: number; b: [ number, string ]; c: number; }, { a: number; b: [ number, string ]; c: number; }
-type CCC = ConvertOptions<[ /* { a: number; }, */number, string ]>;
+type CCC = ConvertOptions<[ { a: number; }, { b: string; }, RegExp, number, string ]>;
+
 
 const cc: CCC = {
     concatenatorCtor: undefined,
@@ -139,10 +165,11 @@ const cc: CCC = {
     // },
     // null: (_k, _v) => true,
     object: {
-        filter: (_k, v) => !!v.a
+        filter: (k, v) => k === '0' && !!(v as { a: number; }).a
     },
     next: {
-        filter: (_k, _v) => 'true'
+        a: {},
+        filter: (_k, _v) => true
     }
 };
 
@@ -153,8 +180,6 @@ const dd: ConvertOptions<[ number ]> = {
         filter: (_k, _v) => _v[ 0 ]
     }
 };
-
-type NN = TypeOptions<[ number ], 2>[ 'number' ];
 
 
 type JJJ = ExtractTypeKeys<[ {
@@ -240,3 +265,4 @@ const a: DataConvert = {
 
 
 console.log(a);
+ */

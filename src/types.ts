@@ -35,7 +35,7 @@ export const makeRecursive = <T>(options: RecursiveValueOpts<T>): RecursiveValue
 };
 
 export const makeRecursiveTransform = <K extends Key = Key, T = unknown, R = unknown>(options: RecursiveTransformerOpts<K, T, R>): RecursiveTransformer<K, T, R> => {
-    return new RecursiveValue(options , true);
+    return new RecursiveValue(options, true);
 };
 
 
@@ -46,6 +46,7 @@ export interface _Literals {
     boolean: boolean;
     symbol: symbol;
     function: Function;
+    regexp: RegExp;
     undefined: undefined;
     null: null;
 }
@@ -57,7 +58,11 @@ export type TypeOfLiterals = keyof _Literals;
 export type TypeOf = TypeOfLiterals | 'array' | 'object';
 
 
-export type GetType<T extends TypeOf> = T extends 'array' ? unknown[] : T extends 'object' ? object : _Literals[ T & TypeOfLiterals ];
+export type GetType<T extends TypeOf> = |
+    T extends 'array' ? unknown[] :
+    T extends RegExp ? 'regexp' :
+    T extends 'object' ? object :
+    _Literals[ T & TypeOfLiterals ];
 
 
 export const typeOf = (value: unknown): TypeOf => {
@@ -66,6 +71,9 @@ export const typeOf = (value: unknown): TypeOf => {
 
     if (isArray(value))
         return 'array';
+
+    if (value instanceof RegExp)
+        return 'regexp';
 
     return typeof value;
 };
