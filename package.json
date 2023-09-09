@@ -1,68 +1,68 @@
 {
-    "name": "@upradata/object-convert",
-    "version": "3.0.1",
-    "author": {
-        "name": "Thomas Milotti",
-        "email": "thomas.milotti@gmail.com",
-        "url": "https://github.com/milottit"
-    },
-    "repository": {
-        "url": "https://github.com/upradata/object-converter"
-    },
-    "description": "Convert Js object with transformers",
-    "sideEffects": false,
-    "main": "lib",
-    "types": "lib-esm",
-    "module": "lib-esm",
-    "files": [
-        "lib",
-        "lib-esm"
-    ],
-    "scripts": {
-        "clean": "shx rm -rf lib lib-esm",
-        "pre-build": "npm run clean",
-        "build": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
-        "post-build": "npm run test && npm run e2e",
-        "watch": "npm run build:watch",
-        "build:watch": "concurrently 'tsc -p tsconfig.lib.json -w' 'tsc -p tsconfig.lib-esm.json -w'",
-        "test": "npm jest --passWithNoTests --verbose false --config jest-ut.config.js",
-        "e2e": "npm jest --passWithNoTests --verbose false --config jest-e2e.config.js",
-        "coverage": "npx jest --passWithNoTests --verbose false --coverage --config jest-ut.config.js",
-        "bump": "npm version patch",
-        "github-push": "npm run build && npm run bump && git pushall && git pushall-tags",
-        "npm-publish": "npm run build && npm publish --access public"
-    },
-    "license": "ISC",
-    "devDependencies": {
-        "@types/jest": "^27.0.1",
-        "@types/node": "^16.7.10",
-        "concurrently": "^6.2.1",
-        "emoji-datasource": "^7.0.2",
-        "fs-extra": "^10.0.0",
-        "jest": "^27.1.0",
-        "jest-environment-node": "^27.1.0",
-        "ts-jest": "^27.0.5",
-        "ts-node": "^10.2.1",
-        "typescript": "^4.4.2"
-    },
-    "dependencies": {
-        "colors": "^1.4.0",
-        "common-tags": "^1.8.0",
-        "is-check": "^1.0.2",
-        "reflect-metadata": "^0.1.13"
-    },
-    "keywords": [
-        "typescript",
-        "javascript",
-        "json",
-        "parser"
-    ],
-    "publishConfig": {
-        "access": "public"
-    },
-    "local": {
-        "dependencies": {
-            "@upradata/util": "link:/home/milottit/Libraries/Upra-Data/util@13.0.1"
-        }
-    }
+	"name": "@upradata/object-convert",
+	"version": "3.0.1",
+	"author": {
+		"name": "Thomas Milotti",
+		"email": "thomas.milotti@gmail.com",
+		"url": "https://github.com/milottit"
+	},
+	"repository": {
+		"url": "https://github.com/upradata/object-converter"
+	},
+	"description": "Convert Js object with transformers",
+	"sideEffects": false,
+	"main": "lib",
+	"types": "lib-esm",
+	"module": "lib-esm",
+	"files": [
+		"lib",
+		"lib-esm"
+	],
+	"scripts": {
+		"clean": "shx rm -rf lib lib-esm",
+		"pre-build": "npm run clean",
+		"build": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
+		"post-build": "npm run test && npm run e2e",
+		"watch": "npm run build:watch",
+		"build:watch": "concurrently 'tsc -p tsconfig.lib.json -w' 'tsc -p tsconfig.lib-esm.json -w'",
+		"test": "npm jest --passWithNoTests --verbose false --config jest-ut.config.js",
+		"e2e": "npm jest --passWithNoTests --verbose false --config jest-e2e.config.js",
+		"coverage": "npx jest --passWithNoTests --verbose false --coverage --config jest-ut.config.js",
+		"bump": "npm version patch",
+		"github-push": "npm run build && npm run bump && git pushall && git pushall-tags",
+		"npm-publish": "npm run build && npm publish --access public"
+	},
+	"license": "ISC",
+	"devDependencies": {
+		"@types/jest": "^28.1.3",
+		"@types/node": "^18.0.0",
+		"concurrently": "^7.2.2",
+		"emoji-datasource": "^14.0.0",
+		"fs-extra": "^10.1.0",
+		"jest": "^28.1.1",
+		"jest-environment-node": "^28.1.1",
+		"ts-jest": "^28.0.5",
+		"ts-node": "^10.8.1",
+		"typescript": "^4.7.4"
+	},
+	"dependencies": {
+		"colors": "^1.4.0",
+		"common-tags": "^1.8.2",
+		"is-check": "^1.0.2",
+		"reflect-metadata": "^0.1.13"
+	},
+	"keywords": [
+		"typescript",
+		"javascript",
+		"json",
+		"parser"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"local": {
+		"dependencies": {
+			"@upradata/util": "link:/home/milottit/Libraries/Upra-Data/util@13.0.1"
+		}
+	}
 }
